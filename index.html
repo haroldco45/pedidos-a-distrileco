@@ -284,6 +284,33 @@ body { font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--az
 .mt8 { margin-top: 8px; }
 .mt16 { margin-top: 16px; }
 
+/* CLIENTES GUARDADOS */
+.clientes-dropdown {
+  position: absolute; top: 100%; left: 0; right: 0; background: white;
+  border: 2px solid var(--azul-light); border-top: none; border-radius: 0 0 10px 10px;
+  max-height: 180px; overflow-y: auto; z-index: 50; box-shadow: var(--shadow-lg);
+}
+.cliente-item {
+  padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--gris-light);
+  display: flex; align-items: center; gap: 8px; transition: background 0.15s;
+}
+.cliente-item:hover { background: #f0f6ff; }
+.cliente-item:last-child { border-bottom: none; }
+.cliente-item-icon { font-size: 16px; }
+.cliente-item-info { flex: 1; }
+.cliente-item-name { font-size: 13px; font-weight: 700; color: var(--azul); }
+.cliente-item-sub { font-size: 11px; color: var(--gris); }
+.cliente-item-del { color: var(--rojo); font-size: 14px; padding: 4px; border-radius: 4px; background: #fee2e2; border: none; cursor: pointer; }
+.clientes-wrap { position: relative; }
+.btn-guardar-cli {
+  width: 100%; margin-top: 12px; background: var(--azul); color: white;
+  border: none; border-radius: 8px; padding: 10px; cursor: pointer;
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  text-transform: uppercase; transition: background 0.2s;
+}
+.btn-guardar-cli:hover { background: var(--azul-light); }
+
 /* RESPONSIVE */
 @media (max-width: 400px) {
   .pedido-header, .pedido-row { grid-template-columns: 60px 1fr 48px 62px 70px; font-size: 12px; }
@@ -322,7 +349,11 @@ body { font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--az
     <div class="form-grid">
       <div class="form-group full">
         <label>Nombre / Empresa *</label>
-        <input type="text" id="cli-nombre" placeholder="Ej: Supermercado La 14" />
+        <div class="clientes-wrap">
+          <input type="text" id="cli-nombre" placeholder="Ej: Supermercado La 14" autocomplete="off"
+            oninput="buscarClientesGuardados(this.value)" onfocus="buscarClientesGuardados(this.value)" />
+          <div class="clientes-dropdown" id="clientes-dropdown" style="display:none"></div>
+        </div>
       </div>
       <div class="form-group full">
         <label>Dirección</label>
@@ -350,7 +381,10 @@ body { font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--az
       </div>
     </div>
   </div>
-  <button class="btn-action btn-primary" style="width:100%;justify-content:center;font-size:16px;" onclick="showTab('tab-catalogo')">
+  <button class="btn-guardar-cli" onclick="guardarClienteActual()">
+    💾 Guardar datos del cliente
+  </button>
+  <button class="btn-action btn-primary" style="width:100%;justify-content:center;font-size:16px;margin-top:10px;" onclick="showTab('tab-catalogo')">
     Ir al Catálogo →
   </button>
 </div>
@@ -518,7 +552,10 @@ body { font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--az
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<div class="footer">Desarrollada por Vibras Positivas HM — Derechos de Autor Reservados</div>
+<div class="footer">
+  <div style="font-size:12px;color:rgba(255,255,255,0.8);font-weight:600;margin-bottom:2px;">Desarrollada por Vibras Positivas HM</div>
+  <div style="font-size:10px;color:rgba(255,255,255,0.4);">Derechos de Autor Reservados © 2025</div>
+</div>
 
 <script>
 // ===== STATE =====
@@ -806,7 +843,10 @@ function printPedido() {
   <table><thead><tr><th>Código</th><th>Producto</th><th>U/M</th><th>Cantidad</th></tr></thead>
   <tbody>${filas}</tbody></table>
   <p style="margin-top:10px;font-size:13px;"><strong>Total ítems: ${pedido.length}</strong></p>
-  <div class="footer">Desarrollada por Vibras Positivas HM — Derechos de Autor Reservados</div>
+  <div class="footer">
+  <div style="font-size:12px;color:rgba(255,255,255,0.8);font-weight:600;margin-bottom:2px;">Desarrollada por Vibras Positivas HM</div>
+  <div style="font-size:10px;color:rgba(255,255,255,0.4);">Derechos de Autor Reservados © 2025</div>
+</div>
   <script>window.onload=()=>window.print()<\/script></body></html>`);
   win.document.close();
 }
@@ -831,7 +871,8 @@ function buildWaMsg() {
     msg += `${i+1}. ${p.codigo ? '['+p.codigo+'] ' : ''}${p.nombre}\n   ${p.unidad} × *${p.cantidad}*\n`;
   });
   msg += `━━━━━━━━━━━━━━━━━━━\n`;
-  msg += `📦 *Total ítems: ${pedido.length}*`;
+  msg += `📦 *Total ítems: ${pedido.length}*\n\n`;
+  msg += `_Pedido generado por Vibras Positivas HM_`;
   return msg;
 }
 
@@ -958,10 +999,88 @@ function getCliente() {
   };
 }
 
+// ===== DIRECTORIO DE CLIENTES =====
+function getDirectorio() {
+  try { return JSON.parse(localStorage.getItem('distrileco_directorio') || '{}'); }
+  catch(e) { return {}; }
+}
+function saveDirectorio(dir) {
+  localStorage.setItem('distrileco_directorio', JSON.stringify(dir));
+}
+
+function guardarClienteActual() {
+  const c = getCliente();
+  if (!c.nombre.trim()) { toast('⚠️ Ingresa el nombre del cliente primero', 'error'); return; }
+  const dir = getDirectorio();
+  const key = c.nombre.trim().toUpperCase();
+  dir[key] = c;
+  saveDirectorio(dir);
+  toast('💾 Cliente guardado: ' + c.nombre, 'success');
+  document.getElementById('clientes-dropdown').style.display = 'none';
+}
+
+function cargarClienteGuardado(key) {
+  const dir = getDirectorio();
+  const c = dir[key];
+  if (!c) return;
+  document.getElementById('cli-nombre').value    = c.nombre    || '';
+  document.getElementById('cli-direccion').value = c.direccion || '';
+  document.getElementById('cli-celular').value   = c.celular   || '';
+  document.getElementById('cli-nit').value       = c.nit       || '';
+  document.getElementById('cli-obs').value       = c.obs       || '';
+  document.getElementById('cli-gps').value       = c.gps       || '';
+  if (c.gps) document.getElementById('gps-status').textContent = '📍 Ubicación guardada';
+  saveCliente();
+  document.getElementById('clientes-dropdown').style.display = 'none';
+  toast('✅ Cliente cargado: ' + c.nombre, 'success');
+}
+
+function eliminarClienteGuardado(key, e) {
+  e.stopPropagation();
+  if (!confirm('¿Eliminar a ' + key + ' del directorio?')) return;
+  const dir = getDirectorio();
+  delete dir[key];
+  saveDirectorio(dir);
+  buscarClientesGuardados(document.getElementById('cli-nombre').value);
+  toast('🗑️ Cliente eliminado', 'success');
+}
+
+function buscarClientesGuardados(q) {
+  const dropdown = document.getElementById('clientes-dropdown');
+  const dir = getDirectorio();
+  const keys = Object.keys(dir);
+  if (!keys.length) { dropdown.style.display = 'none'; return; }
+  const qUp = q.trim().toUpperCase();
+  const matches = qUp
+    ? keys.filter(k => k.includes(qUp))
+    : keys;
+  if (!matches.length) { dropdown.style.display = 'none'; return; }
+  dropdown.innerHTML = matches.map(k => {
+    const c = dir[k];
+    return `<div class="cliente-item" onclick="cargarClienteGuardado('${k.replace(/'/g,"\\'")}')">
+      <span class="cliente-item-icon">👤</span>
+      <div class="cliente-item-info">
+        <div class="cliente-item-name">${c.nombre}</div>
+        <div class="cliente-item-sub">${c.celular || ''} ${c.direccion ? '· '+c.direccion : ''}</div>
+      </div>
+      <button class="cliente-item-del" onclick="eliminarClienteGuardado('${k.replace(/'/g,"\\'")}',event)" title="Eliminar">🗑️</button>
+    </div>`;
+  }).join('');
+  dropdown.style.display = 'block';
+}
+
 // ===== INIT =====
 loadCliente();
 loadPedidoFromStorage();
 updateCatalogStats();
+
+// Cerrar dropdown clientes al hacer clic fuera
+document.addEventListener('click', e => {
+  if (!e.target.closest('.clientes-wrap')) {
+    const dd = document.getElementById('clientes-dropdown');
+    if (dd) dd.style.display = 'none';
+  }
+});
 
 // Autoguardado en cada cambio de campo cliente
 CLI_FIELDS.forEach(id => {
