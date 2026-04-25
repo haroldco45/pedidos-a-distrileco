@@ -678,12 +678,29 @@ function searchProducts(q) {
   list.style.display = 'block';
 }
 
+let selectedCatalogIdx = null;
 function addFromCatalog(idx) {
+  selectedCatalogIdx = idx;
   const p = catalog[idx];
-  addProduct(p.codigo, p.nombre, p.unidad, 1);
-  document.getElementById('search-prod').value = '';
   document.getElementById('autocomplete-list').style.display = 'none';
-  toast('✅ ' + p.nombre + ' agregado', 'success');
+  // Rellenar modal de cantidad
+  document.getElementById('modal-qty-code').textContent = p.codigo || '—';
+  document.getElementById('modal-qty-name').textContent = p.nombre;
+  document.getElementById('modal-qty-um').textContent = p.unidad;
+  document.getElementById('modal-qty-input').value = 1;
+  openModal('modal-qty');
+  setTimeout(() => document.getElementById('modal-qty-input').select(), 100);
+}
+function confirmAddFromCatalog() {
+  if (selectedCatalogIdx === null) return;
+  const p = catalog[selectedCatalogIdx];
+  const cant = parseInt(document.getElementById('modal-qty-input').value) || 1;
+  if (cant <= 0) { toast('La cantidad debe ser mayor a 0', 'error'); return; }
+  addProduct(p.codigo, p.nombre, p.unidad, cant);
+  document.getElementById('search-prod').value = '';
+  closeModal('modal-qty');
+  selectedCatalogIdx = null;
+  toast(`✅ ${p.nombre} × ${cant} agregado`, 'success');
 }
 
 document.addEventListener('click', e => {
@@ -952,9 +969,54 @@ function clearAll() {
   toast('🔄 Nuevo pedido iniciado', 'success');
 }
 
+function setQty(n) { document.getElementById('modal-qty-input').value = n; }
+function adjQty(d) {
+  const el = document.getElementById('modal-qty-input');
+  el.value = Math.max(1, (parseInt(el.value) || 0) + d);
+}
+
 // ===== INIT =====
 loadCatalogFromStorage();
 loadPedidoFromStorage();
 </script>
+
+<!-- MODAL CANTIDAD -->
+<div class="modal-overlay hidden" id="modal-qty">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>🛒 Agregar al Pedido</h3>
+      <button class="modal-close" onclick="closeModal('modal-qty')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:#f0f6ff;border-radius:10px;padding:14px;margin-bottom:16px;">
+        <div style="font-size:11px;color:var(--gris);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Producto seleccionado</div>
+        <div style="font-size:16px;font-weight:700;color:var(--azul);line-height:1.3;" id="modal-qty-name"></div>
+        <div style="margin-top:6px;display:flex;gap:10px;align-items:center;">
+          <span style="font-size:12px;color:var(--gris);font-weight:600;">Cód: <span id="modal-qty-code" style="color:var(--azul)"></span></span>
+          <span style="font-size:12px;background:var(--naranja);color:white;padding:2px 8px;border-radius:20px;font-weight:700;" id="modal-qty-um"></span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>¿Cuántas unidades desea pedir?</label>
+        <input type="number" id="modal-qty-input" min="1" value="1"
+          style="font-size:28px;font-weight:800;text-align:center;padding:14px;border:3px solid var(--naranja);border-radius:10px;color:var(--azul);width:100%;"
+          onkeydown="if(event.key==='Enter')confirmAddFromCatalog()" />
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px;">
+        <button onclick="setQty(1)"  style="padding:10px;background:#f0f4f8;border:2px solid var(--gris-light);border-radius:8px;font-weight:700;font-size:15px;cursor:pointer;">1</button>
+        <button onclick="setQty(2)"  style="padding:10px;background:#f0f4f8;border:2px solid var(--gris-light);border-radius:8px;font-weight:700;font-size:15px;cursor:pointer;">2</button>
+        <button onclick="setQty(6)"  style="padding:10px;background:#f0f4f8;border:2px solid var(--gris-light);border-radius:8px;font-weight:700;font-size:15px;cursor:pointer;">6</button>
+        <button onclick="setQty(12)" style="padding:10px;background:#f0f4f8;border:2px solid var(--gris-light);border-radius:8px;font-weight:700;font-size:15px;cursor:pointer;">12</button>
+        <button onclick="adjQty(-1)" style="padding:10px;background:#fee2e2;border:2px solid #fca5a5;border-radius:8px;font-weight:800;font-size:20px;cursor:pointer;color:var(--rojo);">−</button>
+        <button onclick="adjQty(1)"  style="padding:10px;background:#dcfce7;border:2px solid #86efac;border-radius:8px;font-weight:800;font-size:20px;cursor:pointer;color:var(--verde);grid-column:span 3;">＋</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-qty')">Cancelar</button>
+      <button class="btn-primary" onclick="confirmAddFromCatalog()" style="background:var(--verde);">✅ Agregar al Pedido</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
