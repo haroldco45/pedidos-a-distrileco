@@ -358,56 +358,48 @@ body { font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--az
 <!-- TAB CATÁLOGO -->
 <div class="section" id="tab-catalogo">
   <div class="card">
-    <div class="card-title"><span class="icon">📤</span> Cargar Catálogo de Productos</div>
-    <label class="upload-zone" id="upload-zone">
-      <input type="file" id="file-catalog" accept=".csv,.xlsx,.xls" onchange="loadCatalog(event)" />
-      <div class="upload-icon">📊</div>
-      <div class="upload-text">Subir archivo de productos</div>
-      <div class="upload-sub">Formatos: CSV o Excel (.xlsx / .xls)<br>Columnas: <strong>codigo | nombre | unidad</strong></div>
-    </label>
-    <div class="catalog-stats" id="catalog-stats" style="display:none">
-      <span class="stat-chip" id="stat-total">0 productos</span>
-      <span class="stat-chip" style="background:var(--verde)" id="stat-file">📄 archivo cargado</span>
+    <div class="card-title"><span class="icon">🔍</span> Buscar Producto</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+      <div style="background:var(--azul);color:white;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:700;">
+        📦 <span id="stat-total">314</span> productos disponibles
+      </div>
     </div>
-    <div class="mt8" style="font-size:12px;color:var(--gris);background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px;">
-      💡 <strong>Formato recomendado:</strong><br>
-      Fila 1: encabezados <code>codigo</code>, <code>nombre</code>, <code>unidad</code><br>
-      Fila 2 en adelante: datos de cada producto<br>
-      También puedes agregar productos manualmente abajo.
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title"><span class="icon">🔍</span> Buscar y Agregar al Pedido</div>
     <div class="search-box-wrap">
-      <input type="text" id="search-prod" placeholder="Buscar por código o nombre…" oninput="searchProducts(this.value)" autocomplete="off" />
+      <input type="text" id="search-prod" placeholder="Escribe el nombre o código del producto…" oninput="searchProducts(this.value)" autocomplete="off" />
       <span class="search-icon">🔍</span>
       <div class="autocomplete-list" id="autocomplete-list" style="display:none"></div>
     </div>
-    <div style="font-size:12px;color:var(--gris);text-align:center;margin-bottom:10px;">— o agrega manualmente —</div>
-    <div class="add-product-form">
-      <div class="add-product-grid">
-        <div class="form-group">
-          <label>Código</label>
-          <input type="text" id="man-codigo" placeholder="Ej: 001234" />
-        </div>
-        <div class="form-group">
-          <label>Unidad</label>
-          <input type="text" id="man-unidad" placeholder="Ej: UND, CJA" />
-        </div>
-        <div class="form-group span2">
-          <label>Nombre del Producto *</label>
-          <input type="text" id="man-nombre" placeholder="Nombre del producto" />
-        </div>
-        <div class="form-group">
-          <label>Cantidad</label>
-          <input type="number" id="man-cant" placeholder="1" min="1" />
-        </div>
-        <div class="form-group" style="display:flex;align-items:flex-end;">
-          <button class="btn-action btn-primary" style="width:100%;padding:9px;" onclick="addManual()">
-            ➕ Agregar
-          </button>
-        </div>
+    <div style="font-size:12px;color:var(--gris);text-align:center;margin-top:8px;">
+      Escribe mínimo 2 letras para buscar en el catálogo
+    </div>
+  </div>
+
+  <div class="card" style="border:2px dashed var(--naranja);background:#fffbeb;">
+    <div class="card-title" style="border-color:#fde68a;color:var(--naranja-dark);"><span class="icon">➕</span> ¿Producto no está en la lista?</div>
+    <div style="font-size:13px;color:var(--gris);margin-bottom:12px;">
+      Agrégalo manualmente y quedará incluido en tu pedido.
+    </div>
+    <div class="add-product-grid">
+      <div class="form-group">
+        <label>Código (opcional)</label>
+        <input type="text" id="man-codigo" placeholder="Ej: 99999" />
+      </div>
+      <div class="form-group">
+        <label>Unidad</label>
+        <input type="text" id="man-unidad" placeholder="UND, CJA…" />
+      </div>
+      <div class="form-group span2">
+        <label>Nombre del Producto *</label>
+        <input type="text" id="man-nombre" placeholder="Nombre completo del producto" />
+      </div>
+      <div class="form-group">
+        <label>Cantidad</label>
+        <input type="number" id="man-cant" placeholder="1" min="1" />
+      </div>
+      <div class="form-group" style="display:flex;align-items:flex-end;">
+        <button class="btn-action btn-primary" style="width:100%;padding:10px;" onclick="addManual()">
+          ➕ Agregar al Pedido
+        </button>
       </div>
     </div>
   </div>
@@ -530,7 +522,8 @@ body { font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--az
 
 <script>
 // ===== STATE =====
-let catalog = [];
+const CATALOGO_BASE = [{"codigo":"0008","nombre":"COLOR FAMILIAR 36DP*12UND*20GR 0029","unidad":"DISP"},{"codigo":"0046","nombre":"JAMONETA ZENU PEQUEnA *48UND*180GR 0447","unidad":"UND"},{"codigo":"0047","nombre":"JAMONETA ZENU GRANDE  *24UND*370GR  0446","unidad":"UND"},{"codigo":"0049","nombre":"SALCHICHA AZUL ZENU*48UND  6198-0855","unidad":"UND"},{"codigo":"0644","nombre":"AZUCAR BLANCA 25BOL*1000GR  1823/3830","unidad":"PACA"},{"codigo":"0646","nombre":"AZUCAR SOBRES 10BOL*200UND   3468","unidad":"PACA"},{"codigo":"0836","nombre":"JIRAFA ESPE COCO 25UND*200GR P001","unidad":"CAJA"},{"codigo":"0882","nombre":"LECHE CONDENSADA PARMA 15*400G 7134","unidad":"UND"},{"codigo":"0883","nombre":"LECHE CONDENSADA PARMA 28*100M 827135","unidad":"UND"},{"codigo":"0886","nombre":"CARACOL COMARRICO 50*120GR 5139","unidad":"PACA"},{"codigo":"0888","nombre":"FIDEO COMARRICO 50*120GR 5138","unidad":"PACA"},{"codigo":"0890","nombre":"MACARRON CORTO COMARRICO 50*120GR 5140","unidad":"PACA"},{"codigo":"0893","nombre":"ESPAGUETIS COMARRICO 24*250 5136","unidad":"PACA"},{"codigo":"0894","nombre":"ESPAGUETIS COMARRICO 50*120GR 5137","unidad":"PACA"},{"codigo":"0930","nombre":"ALPISTE EL TRECE 25*460G 41460","unidad":"PACA"},{"codigo":"0933","nombre":"MAIZ PIRA EL TRECE 25*460G 61460","unidad":"PACA"},{"codigo":"10423","nombre":"CAFE SELLO ROJO 24LB*25*20GR 3322","unidad":"LIBRA"},{"codigo":"10722","nombre":"CONCENTRADO CHICLE *35","unidad":"UND"},{"codigo":"10723","nombre":"CONCENTRADO COCO *35","unidad":"UND"},{"codigo":"10782","nombre":"CAPRI VAINILLA 24BS*24UND 20091","unidad":"BOLSA"},{"codigo":"11035","nombre":"GALLETA PENTATACO *24 BONIF UND","unidad":"PAQT"},{"codigo":"11113","nombre":"FIDEO COMARRICO 50*120 BONIF","unidad":"PACA"},{"codigo":"11262","nombre":"PRESTOBAR SIMPLY VENU ROSADA 10*8U 65619","unidad":"DISP"},{"codigo":"11359","nombre":"LAVALOZA CREM AVENA 36*250GR 33794","unidad":"UND"},{"codigo":"11369","nombre":"LECHE PROLE POLVO 30*380GR 827186","unidad":"UND"},{"codigo":"11370","nombre":"LECHE PROLE POLVO 60*200GR 827174","unidad":"UND"},{"codigo":"11391","nombre":"CONCENTRADO SURTIDO LA DELICIA *35","unidad":"UND"},{"codigo":"11395","nombre":"SERVILL FLIA PARTIDA 1A1 32*150 202417","unidad":"UND"},{"codigo":"11408","nombre":"GALLETA MUU MANTEQUILLA 18*18  20025","unidad":"BOLSA"},{"codigo":"11481","nombre":"PALILLOS REDONDO EL SOL 12DISP *12U 6101","unidad":"DISP"},{"codigo":"11583","nombre":"FOSFOROS REFUEGOS 50DSP*20   6234","unidad":"DISP"},{"codigo":"11603","nombre":"LAVALOZA CREM ALOE 12*450+450G 39109","unidad":"UND"},{"codigo":"11730","nombre":"ESPAGUETIS COMARRICO 50*120 BONIF PACA","unidad":"PACA"},{"codigo":"11873","nombre":"GALLETA TACO DIA 48*102 TAQ BONIF","unidad":"UND"},{"codigo":"11877","nombre":"JIRAFA MAXIMO 12*450 BONIF","unidad":"CAJA"},{"codigo":"12011","nombre":"LECHE PROLE POLVO 60*200 BONIF","unidad":"UND"},{"codigo":"12018","nombre":"FOSFORO REFUEGOS 50DIP*20 BONIF","unidad":"DISP"},{"codigo":"12050","nombre":"LAVALOZA CREM LIMON 36*250G 30563","unidad":"UND"},{"codigo":"12051","nombre":"LOZALIQUIDO LIMON 12*850ML+ESPO 0570","unidad":"UND"},{"codigo":"12054","nombre":"LOZALIQUIDO LIMON 12*400 +ESPONJ 0600","unidad":"UND"},{"codigo":"13011","nombre":"LAVALOZA CREM LIMON 12*450+450 1362","unidad":"DISP"},{"codigo":"13093","nombre":"JIRAFA ESPECIAL LAVANDA 24*250G  30F021","unidad":"CAJA"},{"codigo":"13094","nombre":"JIRAFA ESPECIAL BEBE 24*250G  30F011","unidad":"CAJA"},{"codigo":"13095","nombre":"JIRAFA ESPECIAL AZUL LIMO 24*250G 30F031","unidad":"CAJA"},{"codigo":"13107","nombre":"JIRAFA ESPECIAL ALOE VERA 24*250G 30F001","unidad":"CAJA"},{"codigo":"13121","nombre":"ATUN VAN LOMITO EN ACEITE 48*160G 4405","unidad":"UND"},{"codigo":"13168","nombre":"LECHE PROLE POLVO 12*900GR 827175","unidad":"UND"},{"codigo":"13248","nombre":"ATUN VAN LOMITO EN AGUA 48*160G 4404","unidad":"UND"},{"codigo":"13417","nombre":"CHOCOLATE CORONA 10DIS*40U*25G 3777-5731","unidad":"DISP"},{"codigo":"13421","nombre":"LAVALOZA CREM AVENA 12*450+450G 30013","unidad":"UND"},{"codigo":"13487","nombre":"BRINKY FRESA 24BS*10*6   26991","unidad":"BOLSA"},{"codigo":"13502","nombre":"BLANCOX TRADICIONAL 12*1000ML 2116","unidad":"CAJA"},{"codigo":"13509","nombre":"SHAMP HYS 2en1 SUAVE/MANEJ 25*12*18G","unidad":"DISP"},{"codigo":"13536","nombre":"BRIDGE IND VAINILLA 24BS*10PAQ*6 27137","unidad":"UND"},{"codigo":"13537","nombre":"BRIDGE IND CHOCOLATE 24BS*10PAQ*6 27139","unidad":"UND"},{"codigo":"13538","nombre":"BRIDGE IND FRESA 24BS*10PAQ*6 27144","unidad":"UND"},{"codigo":"13539","nombre":"BRIDGE IND NARANJA 24BS*10PAQ*6 27145","unidad":"UND"},{"codigo":"13566","nombre":"FIDEO DORIA CLASICA 24*250G 1439","unidad":"PACA"},{"codigo":"13619","nombre":"SHAMP HYS LIMP/RENOVA 25*12*18G","unidad":"DISP"},{"codigo":"13689","nombre":"24 PAPEL FAMILIAR 24*1 + 2 FAMILIA*1","unidad":"COMBO"},{"codigo":"13714","nombre":"GARBANZO GRANIPACK 25*500G 301P5","unidad":"PACA"},{"codigo":"13903","nombre":"BRINKY CHOCOLATE 24BS*10*6  26990","unidad":"BOLSA"},{"codigo":"13904","nombre":"BRINKY VAINILLA  24BS*10*6   26993","unidad":"BOLSA"},{"codigo":"14082","nombre":"MARGARINA GUSTOSITA 24DISP*4*125G 70454","unidad":"DISP"},{"codigo":"14158","nombre":"JIRAFA ESPECIAL AZUL LIMON 24*250 BONIF","unidad":"CAJA"},{"codigo":"14221","nombre":"DESMANCH R COLOR FLORAL 12*500ML 4024","unidad":"CAJA"},{"codigo":"14276","nombre":"MAIZ PIRA GRANIPACK  25*460G 301A7","unidad":"PACA"},{"codigo":"14348","nombre":"SARDINA OVALADA CATALINA 48*425G 0101","unidad":"UND"},{"codigo":"1460","nombre":"GALLETA PENTATACO*24 UNID  0955-1602","unidad":"UND"},{"codigo":"14765","nombre":"SARDINA PQNA CATALINA 50*155G 0220","unidad":"UND"},{"codigo":"14844","nombre":"LAVALOZA CREM ALOE 36*250  3190","unidad":"UND"},{"codigo":"14879","nombre":"BRIDGE IND LIMON 24BS*10PAQ*6 27635","unidad":"UND"},{"codigo":"14901","nombre":"LENTEJA GRANIPACK 25*500GR  401R9","unidad":"PACA"},{"codigo":"15008","nombre":"PIAZZA JIRAF CHOCO-LEC 12DP*24  27272","unidad":"DISP"},{"codigo":"15034","nombre":"BON VARITAS FRUTO ROJO 12*40ML 10101","unidad":"UND"},{"codigo":"15035","nombre":"BON VARITAS MANZA/CANELA 12*40ML 10102","unidad":"UND"},{"codigo":"15036","nombre":"BON VARITAS VAINILLA 12*40ML 10103","unidad":"UND"},{"codigo":"15037","nombre":"BON VARITAS ARMO FLORAL 12*80ML 0106","unidad":"UND"},{"codigo":"15038","nombre":"BON VARITAS BAMBU 12*80ML 0107","unidad":"UND"},{"codigo":"15041","nombre":"BON VARITAS FRUTOS ROJOS 12*80ML 0110","unidad":"UND"},{"codigo":"15042","nombre":"BON VARITA LAVA-PRO-MANZANI 12*80ML 0112","unidad":"UND"},{"codigo":"15043","nombre":"BON VARITAS MANZANA CANELA 12*80ML 20113","unidad":"UND"},{"codigo":"15044","nombre":"BON VARITAS POMELO 12*80ML 0114","unidad":"UND"},{"codigo":"15063","nombre":"PINOLINA BABY FRESH 12*960ML 0104","unidad":"UND"},{"codigo":"15064","nombre":"PINOLINA BAMBU 12*960ML 0105","unidad":"UND"},{"codigo":"15066","nombre":"PINOLINA CITRONELA 12*960ML 0107-0105","unidad":"UND"},{"codigo":"15068","nombre":"PINOLINA FLORAL 12*960ML 0110","unidad":"UND"},{"codigo":"15070","nombre":"PINOLINA FRUTOS ROJOS 12*960ML 0112","unidad":"UND"},{"codigo":"15071","nombre":"PINOLINA LAVANDA 12*960ML 0112","unidad":"UND"},{"codigo":"15200","nombre":"ARVEJA SECA GRANIPACK 25*460G 101A1","unidad":"PACA"},{"codigo":"15333","nombre":"BUnUELO MAO *12KG B07","unidad":"PACA"},{"codigo":"15372","nombre":"ZUCARITAS KELLOGGS 30*8*30G 61100","unidad":"RIST"},{"codigo":"1547","nombre":"AVENA SABOR TARRO FRESA 12*400   1069","unidad":"UND"},{"codigo":"1548","nombre":"AVENA SABOR TARRO MORA 12*400G 1071","unidad":"UND"},{"codigo":"1549","nombre":"AVENA SABOR TARRO VAINI 12*400G 1074","unidad":"UND"},{"codigo":"15606","nombre":"GALLETA FESTIVAL RECREO 24*12*6 8784","unidad":"UND"},{"codigo":"15609","nombre":"NATILLA TRADICIONAL MAO 12*1KG N01","unidad":"UND"},{"codigo":"15610","nombre":"NATILLA AREQUIPE MAO 12*1KG  N03","unidad":"UND"},{"codigo":"15611","nombre":"NATILLA COCO MAO 12*1KG N06","unidad":"UND"},{"codigo":"15641","nombre":"FRIJOL ANTIOQUENO ZENU 48*310G 7896","unidad":"UND"},{"codigo":"15751","nombre":"NOS INV RAPIGEL 24*10 204316","unidad":"UND"},{"codigo":"15759","nombre":"NOS PLUS CANAL GEL 8*30 120177","unidad":"UND"},{"codigo":"15770","nombre":"PROTEC NOS DIAR 36*15   203636","unidad":"UND"},{"codigo":"15846","nombre":"AZUCAR BLANCA PROVID 25BS*500GR 408/3839","unidad":"PACA"},{"codigo":"15898","nombre":"ALPISTE GRANIPACK 25*460G 101C4","unidad":"PACA"},{"codigo":"15904","nombre":"SHAMP HYS SUA/MAN 2EN1 10*375ML+180ML","unidad":"UND"},{"codigo":"15905","nombre":"SHAMP HYS LIMP RENO 10*375ML+180ML PE","unidad":"UND"},{"codigo":"15999","nombre":"SALCHICHA AZUL ZENU *48UND BONIF","unidad":"UND"},{"codigo":"16017","nombre":"ARROZ VISTA HERMOSA 25LB*500G","unidad":"PACA"},{"codigo":"16020","nombre":"ARROZ CORRIENTE #1 *45KL","unidad":"BULTO"},{"codigo":"16023","nombre":"ARROZ SUPERARROZ 25LB*500G","unidad":"PACA"},{"codigo":"16025","nombre":"ARROZ SUPERARROZ 20BOL*5LBS","unidad":"BULTO"},{"codigo":"16026","nombre":"ARROZ SUPERARROZ 10BOL*10LBS","unidad":"BULTO"},{"codigo":"16037","nombre":"FIBRAS","unidad":"UND"},{"codigo":"16042","nombre":"SUPER B BLANQUEADOR TRADI 6*2000ML 6516","unidad":"UND"},{"codigo":"16043","nombre":"SUPER B BLANQUEADOR TRADIC 4*3800ML 7138","unidad":"UND"},{"codigo":"16047","nombre":"SUPER B DESENGRASA CITRICO 24*500G 6521","unidad":"UND"},{"codigo":"16051","nombre":"SUPER B LAVA LOZA LIQ LIMON 24*500G 6517","unidad":"UND"},{"codigo":"16054","nombre":"SUPER B LIMPIA VIDRI B/MARINA 24*500 652","unidad":"UND"},{"codigo":"16055","nombre":"SUPER B ROPA COLOR FLORA 12*1000ML  6518","unidad":"UND"},{"codigo":"16099","nombre":"SHAMP HYS 2EN1 SUAV/MANEJ 12*180ML 8333","unidad":"UND"},{"codigo":"16101","nombre":"SHAMP HYS LIMP RENOV 12*180ML 9958","unidad":"UND"},{"codigo":"16156","nombre":"BLANCOX TRADIC MEGA OFER 8*2000ML 0072","unidad":"CAJA"},{"codigo":"16181","nombre":"ACEITE RICACEITE 24*500ML","unidad":"CAJA"},{"codigo":"16256","nombre":"SHAMP HYS PROTECCION CAIDA 12*180ML","unidad":"UND"},{"codigo":"16324","nombre":"BON VARITAS BAMBU 12*40ML 0104","unidad":"UND"},{"codigo":"16548","nombre":"SHAMP HYS PURIFI CAPILAR CARBON 12*180ML","unidad":"UND"},{"codigo":"16577","nombre":"PAPEL H FAMILIAR 48*1   201260","unidad":"UND"},{"codigo":"16592","nombre":"TOALL COCI ACOL BNCA 12*120H  202433","unidad":"UND"},{"codigo":"16868","nombre":"LISTERINE COOL MINT ZERO 12*500ML 580415","unidad":"UND"},{"codigo":"16888","nombre":"SALERO REFISAL 24UND*130GR 4869","unidad":"UND"},{"codigo":"16972","nombre":"SARDINA PQNA IDEAL 50*155GR 38352","unidad":"UND"},{"codigo":"17016","nombre":"BLANCOX COJIN DISP 12*12*100ML BONIF","unidad":"DISP"},{"codigo":"17039","nombre":"CONCENTRADO MARACUYA *35","unidad":"UND"},{"codigo":"17082","nombre":"PRESTOBARBA 12DP*8*3HJ+4 VENU ROSA 30162","unidad":"DISP"},{"codigo":"17246","nombre":"ATUN LOMITO CATALINA EN ACEITE 48*160GR","unidad":"UND"},{"codigo":"17248","nombre":"GALLETA FESTIVAL CHOCOL 24*12*6 BONIF","unidad":"UND"},{"codigo":"17302","nombre":"MAIZ DULCE  ZENU 24*241G  11706","unidad":"UND"},{"codigo":"17478","nombre":"FRIJOL ANTIOQUENO ZENU 24*580GR  7897","unidad":"UND"},{"codigo":"17516","nombre":"PINOLINA CANELA Y MIEL 12*960ML 0106","unidad":"UND"},{"codigo":"17534","nombre":"SHAMP HYS 2EN1 SUAV Y MANEJ 10*375 +375","unidad":"DISP"},{"codigo":"17542","nombre":"COLCAFE SOBRE 30DISP*48*1.5GR   6678","unidad":"DISP"},{"codigo":"17650","nombre":"GALLE FESTI RECREO 24*12*6 BONIF","unidad":"UND"},{"codigo":"17656","nombre":"VELA COLOR IMPERIAL 48PQ*10UND 10044","unidad":"PAQ"},{"codigo":"17851","nombre":"RAID ELIM VOLADOR 12*285+RAID MAX*285ML","unidad":"DISP"},{"codigo":"17853","nombre":"RAID ELIM VOLADORES 6DISP*3*285ML 382516","unidad":"DISP"},{"codigo":"17997","nombre":"SHAMP HYS FUERZA RAIZ 12*180ML  9558","unidad":"UND"},{"codigo":"18105","nombre":"SHAMP HYS LIMP RENOV 10*375ML+375ML","unidad":"UND"},{"codigo":"18175","nombre":"LAVALOZA CREM COCO 12*450+450","unidad":"DISP"},{"codigo":"18191","nombre":"LAVAGEL CHICLE 12*700GR    10058","unidad":"UND"},{"codigo":"18192","nombre":"LAVAGEL LIMON 12*700GR   10057","unidad":"UND"},{"codigo":"18199","nombre":"ARIEL REGU 18*450 + 6 REVITA*450G","unidad":"PACA"},{"codigo":"18217","nombre":"LOZALIQUIDO BOTANICAL 12*850+ ESPON 0508","unidad":"UND"},{"codigo":"18220","nombre":"AZUCAR BLAN NUTRES 25BOL*500GR UND BONIF","unidad":"UND"},{"codigo":"18230","nombre":"GALLETA QUESO MANTQ 18*4 TACOS  8616","unidad":"UND"},{"codigo":"18358","nombre":"LAVAGEL CHICLE 12*350G  10234","unidad":"UND"},{"codigo":"18359","nombre":"LAVAGEL LIMON 12*350GR    10235","unidad":"UND"},{"codigo":"18360","nombre":"LAVAGEL UVA 12*350GR 10236","unidad":"UND"},{"codigo":"18368","nombre":"AZUCAR BLANCA 10BOL*2.5KG  3553/3837","unidad":"PACA"},{"codigo":"18455","nombre":"SHAMP HYS SENSITVE 12*180G 1615","unidad":"UND"},{"codigo":"18561","nombre":"LECHE PROLE POLVO 30*380GR BONIF","unidad":"UND"},{"codigo":"18700","nombre":"BLANCOX TRADICIONAL REPUES 24*500ML 0076","unidad":"CAJA"},{"codigo":"18878","nombre":"LAVALOZA CREM LIMON 6*850+850G  0660","unidad":"DISP"},{"codigo":"18949","nombre":"GRISSLY SANDIA SOUR 24*1*72GR  13786","unidad":"UND"},{"codigo":"18950","nombre":"GRISSLY SOUR  24*1*72GR   14129","unidad":"UND"},{"codigo":"18963","nombre":"1 BON BOM FRESA + 1 BON INTEN + 1 SURTID","unidad":"PREPA"},{"codigo":"18981","nombre":"SHAMP HYS ACEITE DE ARGAN 12*180ML  5454","unidad":"UND"},{"codigo":"19004","nombre":"GALLETA NAV CARAVA NOEL 24*200G UND BONI","unidad":"UND"},{"codigo":"19038","nombre":"LAVALOZA CREM ALOE 6*850+850G  0658","unidad":"DISP"},{"codigo":"19061","nombre":"TOALL COCI FLIA PRACTI 12*1*50H  202319","unidad":"UND"},{"codigo":"19064","nombre":"SHAMP HYS ARGAN 10*375ML+180ML PE","unidad":"UND"},{"codigo":"19068","nombre":"FRIJOL ZARAGOZA GRANIPACK 25*500GR 201F2","unidad":"PACA"},{"codigo":"19075","nombre":"RAYOL ESPIRAL 50*2UND 0301","unidad":"UND"},{"codigo":"19091","nombre":"JABON BARRA LIQ MAXIMO CITR 12*1L 30A102","unidad":"TARRO"},{"codigo":"19106","nombre":"BRINKY LIMON 24BS*10*6 26992","unidad":"BOLSA"},{"codigo":"19120","nombre":"NOS BUENAS NOCHES TELA 18*10 200249","unidad":"UND"},{"codigo":"19131","nombre":"LAVALOZA CREM AVENA 6*850+850 0662","unidad":"DISP"},{"codigo":"19168","nombre":"GALLETA MUU TIPO LECHE 30BS*18 BONIF","unidad":"BOLSA"},{"codigo":"19208","nombre":"PAPEL ALUMINIO EL SOL 30UND*7MTS  6154","unidad":"UND"},{"codigo":"19264","nombre":"NOS BUENAS NOCHES TELA 36*4 201174","unidad":"UND"},{"codigo":"19308","nombre":"GALLETA DUCALES 3 TACO 24*315G 8808/9815","unidad":"UND"},{"codigo":"19315","nombre":"LECHE CIDELAC POLVO 30*380GR","unidad":"UND"},{"codigo":"19316","nombre":"LECHE CIDELAC POLVO 12*900GR","unidad":"UND"},{"codigo":"19337","nombre":"VELON #6 BLANCO SAN JORGE 16DP*6U 21068","unidad":"DISP"},{"codigo":"19370","nombre":"SALSA BBQ CONST 6DISP*12*80GR 15322","unidad":"DISP"},{"codigo":"19391","nombre":"2 GALLETA MUU TIPO LECHE 30BS*18 P.ESP","unidad":"PREPA"},{"codigo":"19394","nombre":"NOS NAT NORMAL 48*10 SIN ALAS NUV 203678","unidad":"UND"},{"codigo":"19410","nombre":"GRISSLY TIBURON 24*1*40GR NUEV 15526","unidad":"UND"},{"codigo":"19411","nombre":"GRISSLY BON BON BUM 24BS*1*45GR 15539","unidad":"UND"},{"codigo":"19418","nombre":"VELON #6 SURTIDO SAN JORGE 16DP*6U 21006","unidad":"DISP"},{"codigo":"19421","nombre":"GRISSLY COCODRILO 24*1*40GR NUEV 15524","unidad":"UND"},{"codigo":"19422","nombre":"GRISSLY HUELLITA 24*1*40GR NUEV 15525","unidad":"UND"},{"codigo":"19424","nombre":"AVENA DEL SUR PINA 4D*200  NUEV 1198","unidad":"DOC"},{"codigo":"19425","nombre":"AVENA DEL SUR SALPICON 4D*200  NUEV 1194","unidad":"DOC"},{"codigo":"19436","nombre":"GRISSLY CLASICA 24*1*72GR NUEV 15529","unidad":"UND"},{"codigo":"19437","nombre":"GRISSLY AROS 24*1*72GR 16467","unidad":"UND"},{"codigo":"19438","nombre":"GRISSLY OSOS 24*1*72GR NUEV 15534","unidad":"UND"},{"codigo":"19440","nombre":"GRISSLY GUSANO 24*1*72GR NUEV 15537","unidad":"UND"},{"codigo":"19452","nombre":"5 CAJA SERVIL FLIA PARTID 1A1 32*150 P.E","unidad":"COMBO"},{"codigo":"19453","nombre":"GRISSLY DELFIN 24*1*73GR NUEV 15532","unidad":"UND"},{"codigo":"19454","nombre":"SUPER B LAVA CREM SUPB LIM 4*3000G 16449","unidad":"UND"},{"codigo":"19457","nombre":"GRISSLY CORAZON 24*1*70GR NUEV 15530","unidad":"UND"},{"codigo":"19460","nombre":"VELON #2 SURTIDA SAN JORGE 16DP*6U 21002","unidad":"DISP"},{"codigo":"19469","nombre":"AVENA DEL SUR VAINILLA 4D*200 NUEV 1190","unidad":"DOC"},{"codigo":"19470","nombre":"AVENA DEL SUR CANELA 4D*200 NUEV 1196","unidad":"DOC"},{"codigo":"19473","nombre":"ATUN LOMITO PERLADO ACEITE 48*175GR NUEV","unidad":"UND"},{"codigo":"19475","nombre":"GRISSLY MARINO 24*1*70G  NUEVO 15533","unidad":"UND"},{"codigo":"19482","nombre":"7 TOALL COCI FLIA PRACTI 12*1*50H P.ESP","unidad":"COMBO"},{"codigo":"19491","nombre":"AVENA DEL SUR MORA 4D*200 NUEV 1200","unidad":"DOC"},{"codigo":"19508","nombre":"30 CAJA NOS INV RAPIGEL 24*10 P.ESPC","unidad":"COMBO"},{"codigo":"19519","nombre":"JABON BARRA LIQ MAXIM CITRIC 24*500 BONI","unidad":"TARRO"},{"codigo":"19520","nombre":"SHAMP HYS ACEIT ARGAN 10*375ML+375ML","unidad":"UND"},{"codigo":"19530","nombre":"GRISSLY GAMERS 24*1*40GR NUEV 15528","unidad":"UND"},{"codigo":"19547","nombre":"MAY_STAYFRE SIN ALAS PAGUE 7 LLEVE 10UND","unidad":"COMBO"},{"codigo":"19548","nombre":"MAY_STAYFRE ALAS PAGUE 7 LLEVE 10UND","unidad":"COMBO"},{"codigo":"19556","nombre":"VELON #2 BLANCO SAN JORGE 16DIS*6U 21058","unidad":"DISP"},{"codigo":"19558","nombre":"PIAZZA JIRAF CHOC-LEC 12DP*P24LL26 20378","unidad":"DISP"},{"codigo":"19559","nombre":"PIAZZA JIRAF M.FRESA 12DP*P24LLE26 20376","unidad":"DISP"},{"codigo":"19560","nombre":"PIAZZA JIRAF VAINILL 12DP*P24LLE26 20375","unidad":"DISP"},{"codigo":"19566","nombre":"1 BRINKY CHOCO+1 PINT.LENG+1 LIMON*10 P.","unidad":"PREPA"},{"codigo":"19597","nombre":"JABON BARRA LIQ MAX CITR 24*500ML 30A106","unidad":"TARRO"},{"codigo":"19606","nombre":"PIAZZA JIRAF CHOCOLT RETRO12DP*24 20120","unidad":"DISP"},{"codigo":"19607","nombre":"PIAZZA JIRAF VAINILLA12DP*24 RETRO 20119","unidad":"DISP"},{"codigo":"19609","nombre":"PIAZZA JIRAF FRESA12DP*24 RETRO 20118","unidad":"DISP"},{"codigo":"19618","nombre":"CHOCOLATE CORONA 24BRR*16PLLA*500GR NV","unidad":"BARRA"},{"codigo":"19622","nombre":"ARVEJA CON ZANAH 24*280 RESPIN 59781","unidad":"UND"},{"codigo":"19628","nombre":"AVENA DEL SUR FRESA 4D*200 NUEV 1192","unidad":"DOC"},{"codigo":"19638","nombre":"50 CAJA NOS INV RAPIGEL 24*10 P.ESPC","unidad":"COMBO"},{"codigo":"19642","nombre":"1 CAJA NOS NAT NORMAL 48*10 P.ESPE","unidad":"COMBO"},{"codigo":"19668","nombre":"SHAMP HYS ANTICOMEZON 12*180ML  5366","unidad":"UND"},{"codigo":"19672","nombre":"LECHE CIDELAC POLVO 30*380GR BONIF","unidad":"UND"},{"codigo":"19673","nombre":"LECHE CIDELAC POLVO 12*900GR BONIF","unidad":"UND"},{"codigo":"19688","nombre":"SHAMP PANTE KERATI 8*300+ACO250ML 5245","unidad":"DISP"},{"codigo":"19706","nombre":"TOALL COCINA GREEN D A D 24*1*70H 203268","unidad":"PACA"},{"codigo":"19712","nombre":"SHAMP HYS ANTICOMEZON 10*375+ 180ML","unidad":"DISP"},{"codigo":"19717","nombre":"5 CAJA NOS INV RAPIGEL 8*30+15 MULT P.ES","unidad":"COMBO"},{"codigo":"19723","nombre":"GALLETA TACO DIA*48*102G TAQUITO 73647","unidad":"TAQ"},{"codigo":"19725","nombre":"TAMPON NOS DIG REG 12*12+15MLT 203221","unidad":"UND"},{"codigo":"19728","nombre":"SUPER B LAVA LOZ LIQ LIMON 24*500G BONIF","unidad":"UND"},{"codigo":"19733","nombre":"NATILLA TRES LECHE MAO 12*1K  NUEV  NPL","unidad":"UND"},{"codigo":"19750","nombre":"LOZALIQUIDO HUMEC/VIT E 12*400+ESPO 1187","unidad":"UND"},{"codigo":"19752","nombre":"MINIBUM SURTIDO/ASSORT 16*100 16077","unidad":"BOLSA"},{"codigo":"19758","nombre":"MAIZ TIERNO RESPIN 24*340G 60196","unidad":"UND"},{"codigo":"19764","nombre":"GALLETA DUCALES 16*6TACOS*630GR 76423","unidad":"DISP"},{"codigo":"19765","nombre":"CHOCOLISTO 20DISP*18*15GR  NUEV 75624","unidad":"DISP"},{"codigo":"19772","nombre":"FRIJOL ZARAGOZA EL TRECE 25*500G 235001","unidad":"PACA"},{"codigo":"19774","nombre":"1 PACA MEGARROLLO 48*1 +  6  MEGA*1","unidad":"COMBO"},{"codigo":"19785","nombre":"CHOCOLISTO TARRO UNIDAD 12*900G 75622","unidad":"UND"},{"codigo":"19792","nombre":"PRESTOBARBA 24DISP*28*2HOJ ULTRAGRIP 207","unidad":"DISP"},{"codigo":"19801","nombre":"PAPEL ALUMINIO EL SOL 30*16MT 6165","unidad":"UND"},{"codigo":"19818","nombre":"GRISSLY SPLASH 24*1*72GR 16473","unidad":"UND"},{"codigo":"19825","nombre":"1 PACA MEGARROLLO 48*1 +  4 MEGA*1","unidad":"COMBO"},{"codigo":"19829","nombre":"VELON #4 BLANCO SAN JORGE 14DP*5U 21063","unidad":"DISP"},{"codigo":"19830","nombre":"VELON #4 SURTIDO SAN JORGE 14DP*5U 21004","unidad":"DISP"},{"codigo":"19836","nombre":"JIRAFA ESPECIAL ALOE VERA 24*250G BONIF","unidad":"CAJA"},{"codigo":"19839","nombre":"GRISSLY TOM Y JERRY 24*1*70G  16186","unidad":"UND"},{"codigo":"19854","nombre":"PIAZZA JIRAF FRESA SALVAJE12DP*24 20813","unidad":"DISP"},{"codigo":"19878","nombre":"TOALL COCI ACOL GRA BLAN 12*1*44H 202430","unidad":"UND"},{"codigo":"19887","nombre":"GRISSLY GUSANO 24*1*70GR NUEV 16541","unidad":"UND"},{"codigo":"19889","nombre":"CHOCOLATE CORONA 50BRR*18PLLA*450G 74116","unidad":"BARRA"},{"codigo":"19891","nombre":"LECHE CIDELAC POLVO 98UND*125GR BONIF","unidad":"UND"},{"codigo":"19904","nombre":"CAFE SELLO ROJO 24DISP*10SB*40GR 9648","unidad":"BOLSA"},{"codigo":"19917","nombre":"MEZCLA TORTA SUR VAIN 24*400G BONIF","unidad":"UND"},{"codigo":"19955","nombre":"ATUN VAN LOMITO EN ACEITE 48*160G 15693","unidad":"UND"},{"codigo":"19971","nombre":"ATUN VAN LOMITO EN AGUA 48*160G 15692","unidad":"UND"},{"codigo":"20009","nombre":"2 CONFITE HALLOWEEN 50BS*100 PRE.ESP","unidad":"COMBO"},{"codigo":"20015","nombre":"CAFE LA BASTILLA 48*110GR  1079670","unidad":"UND"},{"codigo":"20018","nombre":"ACEITE MI CALDERITO 12*900ML BONIF","unidad":"UND"},{"codigo":"20029","nombre":"LOZALIQUIDO GRANA/ALOE 12*850ML+ESP 1391","unidad":"UND"},{"codigo":"20058","nombre":"MARGARINA GUSTOSITA C/SAL 24*250G 71189","unidad":"UND"},{"codigo":"20085","nombre":"GALLETA MUU MANTEQ EXTCONT 18*18  20885","unidad":"BOLSA"},{"codigo":"20086","nombre":"PIAZZA JIRAF BBB ROJO 12DP*24  20899","unidad":"DISP"},{"codigo":"20089","nombre":"GALLETA QUESO MANTQ 8*6TC*798G 2028","unidad":"DISP"},{"codigo":"20136","nombre":"ARIEL REGULAR 12*1.1KG 829988","unidad":"UND"},{"codigo":"2429","nombre":"BON BON BUM FRESA INTEN 15*24UN  22429","unidad":"BOLSA"},{"codigo":"2447","nombre":"AVENA SABOR TARRO CANEL 12*400G 1070","unidad":"UND"},{"codigo":"2577","nombre":"GALLETA QUESO MANTQ 24*3 TACOS  9013","unidad":"UND"},{"codigo":"3160","nombre":"BLANCOX TRADICIONAL 24*500ML   0424","unidad":"CAJA"},{"codigo":"3163","nombre":"BLANCOX COJIN 144*100ML     33152","unidad":"CAJA"},{"codigo":"3186","nombre":"ARROZ SUPERARROZ 25*500 BONIF","unidad":"PACA"},{"codigo":"3238","nombre":"BLANCOX TRADICIONAL 4*3800ML MEGA 0079","unidad":"CAJA"},{"codigo":"3441","nombre":"SAL REFISAL 20UND*1000GR   11206","unidad":"PACA"},{"codigo":"3442","nombre":"SAL REFISAL 25UND*500GR 11105","unidad":"PACA"},{"codigo":"3508","nombre":"ESPAGUETIS DORIA 24*250G  1438","unidad":"PACA"},{"codigo":"3807","nombre":"NUCITA CALIENTE 16DP*18UND  2191","unidad":"DISP"},{"codigo":"3943","nombre":"QUIMBAYAS 18BS*18UND  1429","unidad":"BOLSA"},{"codigo":"3950","nombre":"PIAZZA JIRAF CHOCOLATE 12DP*24  27281","unidad":"DISP"},{"codigo":"3964","nombre":"GALLETA MUU TIPO LECHE 30BS*18 27692","unidad":"BOLSA"},{"codigo":"4004","nombre":"BON BON BUM FRESA 15BS*24UND  28118","unidad":"BOLSA"},{"codigo":"4250","nombre":"CONCENTRADO KOLA CHAMP *35","unidad":"UND"},{"codigo":"4561","nombre":"LOZALIQUIDO ALOE 12*850ML+ESPONJA 33982","unidad":"UND"},{"codigo":"4591","nombre":"PRESTOBARBA 3HOJA 12DP*10U 20235/0406","unidad":"DISP"},{"codigo":"4593","nombre":"PIAZZA JIRAFA MALTE/FRESA12DP*24  27275","unidad":"UND"},{"codigo":"4829","nombre":"PIAZZA JIRAFA VAINILLA 12DP*24  27280","unidad":"UND"},{"codigo":"4837","nombre":"CHOCOLISTO TARRO UNIDAD 30*300G  6740","unidad":"UND"},{"codigo":"4894","nombre":"JIRAFA MAXIMO 12UND*450GR 30A001","unidad":"CAJA"},{"codigo":"5072","nombre":"CAFE LA BASTILLA 24LB*25*20GR 3294","unidad":"LIBRA"},{"codigo":"5073","nombre":"CAFE LA BASTILLA 24*50GR 3296","unidad":"LIBRA"},{"codigo":"7018","nombre":"CONCENTRADO AREQUIPE *35","unidad":"UND"},{"codigo":"7019","nombre":"CONCENTRADO MANTECADO *35","unidad":"UND"},{"codigo":"9123","nombre":"MAZAMORRA LA MONTAnA 25*500GR 10001","unidad":"PACA"},{"codigo":"9126","nombre":"FRIJOL LIMA GRANIPACK 25*500GR 01A8","unidad":"PACA"},{"codigo":"9332","nombre":"GALLETA FESTIVAL CHOCOL 24*12*6  1513","unidad":"UND"},{"codigo":"9333","nombre":"GALLETA FESTIVAL FRESA 24*12*6 1510","unidad":"UND"},{"codigo":"9334","nombre":"GALLETA FESTIVAL LIMON 24*12*6  30881","unidad":"UND"},{"codigo":"9335","nombre":"GALLETA FESTIVAL VAINILLA 24*12*6  30882","unidad":"UND"},{"codigo":"9378","nombre":"SAL REFISAL 25*500 PACA BONIF","unidad":"PACA"},{"codigo":"9435","nombre":"CHOCOLATE CRUZ 24DISP*32*2UND 1056217","unidad":"DISP"},{"codigo":"9463","nombre":"COLCAFE CLASICO 12*170G  3353","unidad":"UND"},{"codigo":"9470","nombre":"CHOCOLATINA JET 30DISP*50UND   1066740","unidad":"DISP"},{"codigo":"9549","nombre":"COCOA CORONA 34UND*230G 79789","unidad":"UND"},{"codigo":"9704","nombre":"GALLETA SALTIN 3 TACOS UND *24*300G 1568","unidad":"UND"},{"codigo":"9784","nombre":"BRIDGE IND AREQUIPE 24BS*10PAQ*6  27142","unidad":"UND"},{"codigo":"9794","nombre":"CAFE SELLO ROJO 24LB*50 GR 3320","unidad":"LIBRA"}];
+let catalog = [...CATALOGO_BASE];
 let pedido = [];
 let waNumber = localStorage.getItem('distrileco_wa') || '';
 
@@ -588,76 +581,12 @@ function getGPS() {
   );
 }
 
-// ===== CATÁLOGO =====
-function loadCatalog(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const ext = file.name.split('.').pop().toLowerCase();
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      if (ext === 'csv') {
-        parseCsv(e.target.result);
-      } else {
-        const wb = XLSX.read(e.target.result, { type: 'binary' });
-        const ws = wb.Sheets[wb.SheetNames[0]];
-        const data = XLSX.utils.sheet_to_json(ws, { defval: '' });
-        parseExcelData(data);
-      }
-    } catch(err) { toast('❌ Error al leer el archivo: ' + err.message, 'error'); }
-  };
-  if (ext === 'csv') reader.readAsText(file, 'UTF-8');
-  else reader.readAsBinaryString(file);
-}
-
-function parseCsv(text) {
-  const lines = text.trim().split('\n');
-  if (lines.length < 2) { toast('Archivo CSV vacío', 'error'); return; }
-  const sep = lines[0].includes(';') ? ';' : ',';
-  const headers = lines[0].split(sep).map(h => h.trim().toLowerCase().replace(/['"]/g,''));
-  const idxCodigo = headers.findIndex(h => h.includes('cod') || h === 'codigo' || h === 'referencia');
-  const idxNombre = headers.findIndex(h => h.includes('nom') || h.includes('prod') || h.includes('descr'));
-  const idxUnidad = headers.findIndex(h => h.includes('uni') || h === 'um' || h === 'u/m');
-  catalog = [];
-  for (let i = 1; i < lines.length; i++) {
-    const cols = lines[i].split(sep).map(c => c.trim().replace(/['"]/g,''));
-    if (!cols[idxNombre >= 0 ? idxNombre : 1]) continue;
-    catalog.push({
-      codigo: idxCodigo >= 0 ? cols[idxCodigo] : '',
-      nombre: idxNombre >= 0 ? cols[idxNombre] : cols[1] || '',
-      unidad: idxUnidad >= 0 ? cols[idxUnidad] : 'UND'
-    });
-  }
-  saveCatalog();
-  updateCatalogStats(catalog.length);
-  toast(`✅ ${catalog.length} productos cargados`, 'success');
-}
-
-function parseExcelData(data) {
-  catalog = [];
-  const keys = Object.keys(data[0] || {}).map(k => k.toLowerCase());
-  const kCodigo = Object.keys(data[0]).find(k => k.toLowerCase().includes('cod') || k.toLowerCase().includes('ref')) || '';
-  const kNombre = Object.keys(data[0]).find(k => k.toLowerCase().includes('nom') || k.toLowerCase().includes('prod') || k.toLowerCase().includes('descr')) || Object.keys(data[0])[1] || '';
-  const kUnidad = Object.keys(data[0]).find(k => k.toLowerCase().includes('uni') || k.toLowerCase() === 'um') || '';
-  data.forEach(row => {
-    if (!row[kNombre]) return;
-    catalog.push({ codigo: row[kCodigo] || '', nombre: row[kNombre] || '', unidad: row[kUnidad] || 'UND' });
-  });
-  saveCatalog();
-  updateCatalogStats(catalog.length);
-  toast(`✅ ${catalog.length} productos cargados`, 'success');
-}
-
-function saveCatalog() { localStorage.setItem('distrileco_catalog', JSON.stringify(catalog)); }
-function loadCatalogFromStorage() {
-  const saved = localStorage.getItem('distrileco_catalog');
-  if (saved) { catalog = JSON.parse(saved); updateCatalogStats(catalog.length); }
-}
-function updateCatalogStats(n) {
-  if (n > 0) {
-    document.getElementById('catalog-stats').style.display = 'flex';
-    document.getElementById('stat-total').textContent = n + ' productos';
-  }
+// ===== CATÁLOGO EMBEBIDO =====
+// El catálogo de 314 productos ya está cargado en CATALOGO_BASE
+// Solo actualizamos el contador en UI
+function updateCatalogStats() {
+  const el = document.getElementById('stat-total');
+  if (el) el.textContent = catalog.length + ' productos';
 }
 
 // ===== BÚSQUEDA =====
@@ -976,8 +905,8 @@ function adjQty(d) {
 }
 
 // ===== INIT =====
-loadCatalogFromStorage();
 loadPedidoFromStorage();
+updateCatalogStats();
 </script>
 
 <!-- MODAL CANTIDAD -->
