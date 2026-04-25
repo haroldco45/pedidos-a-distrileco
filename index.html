@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Pedidos Distrileco</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --azul: #0d2b52;
+  --azul-mid: #1a4080;
+  --azul-light: #2563a8;
+  --naranja: #f97316;
+  --naranja-dark: #ea6c0a;
+  --verde: #16a34a;
+  --rojo: #dc2626;
+  --gris: #64748b;
+  --gris-light: #e2e8f0;
+  --bg: #f0f4f8;
+  --white: #ffffff;
+  --shadow: 0 2px 12px rgba(13,43,82,0.12);
+  --shadow-lg: 0 8px 32px rgba(13,43,82,0.18);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--azul); min-height: 100vh; }
+
+/* HEADER */
+.header {
+  background: var(--azul);
+  padding: 0;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+.header-top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px;
+}
+.header-logo { display: flex; align-items: center; gap: 10px; }
+.logo-icon {
+  width: 40px; height: 40px; background: var(--naranja);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 800; color: white; font-size: 18px;
+}
+.header-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; color: white; font-size: 20px; letter-spacing: 0.5px; line-height: 1.1; }
+.header-sub { font-size: 11px; color: rgba(255,255,255,0.6); font-weight: 400; }
+.whatsapp-config-btn {
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+  color: white; padding: 6px 10px; border-radius: 8px; font-size: 12px; cursor: pointer;
+  display: flex; align-items: center; gap: 5px;
+}
+.header-tabs {
+  display: flex; background: rgba(0,0,0,0.2); overflow-x: auto;
+}
+.tab-btn {
+  flex: 1; min-width: 90px; padding: 10px 8px; border: none; background: transparent;
+  color: rgba(255,255,255,0.6); font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; font-weight: 600; cursor: pointer; text-transform: uppercase;
+  letter-spacing: 0.5px; transition: all 0.2s; border-bottom: 3px solid transparent;
+  white-space: nowrap;
+}
+.tab-btn.active { color: var(--naranja); border-bottom-color: var(--naranja); background: rgba(249,115,22,0.1); }
+
+/* SECTIONS */
+.section { display: none; padding: 16px; max-width: 700px; margin: 0 auto; }
+.section.active { display: block; }
+
+/* CARDS */
+.card {
+  background: white; border-radius: 12px; padding: 16px;
+  box-shadow: var(--shadow); margin-bottom: 16px;
+}
+.card-title {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+  font-size: 16px; color: var(--azul); margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--gris-light); padding-bottom: 10px;
+}
+.card-title .icon { font-size: 18px; }
+
+/* FORMULARIO */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.form-group { display: flex; flex-direction: column; gap: 4px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-group label { font-size: 11px; font-weight: 600; color: var(--gris); text-transform: uppercase; letter-spacing: 0.5px; }
+.form-group input, .form-group textarea {
+  border: 2px solid var(--gris-light); border-radius: 8px; padding: 10px 12px;
+  font-family: 'Barlow', sans-serif; font-size: 14px; color: var(--azul);
+  transition: border-color 0.2s; background: #fafcff;
+}
+.form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--azul-light); }
+.form-group textarea { resize: vertical; min-height: 70px; }
+
+.gps-row { display: flex; gap: 8px; align-items: flex-end; }
+.gps-row input { flex: 1; }
+.btn-gps {
+  background: var(--azul); color: white; border: none; border-radius: 8px;
+  padding: 10px 14px; cursor: pointer; font-size: 18px; white-space: nowrap;
+  transition: background 0.2s;
+}
+.btn-gps:hover { background: var(--azul-light); }
+.gps-status { font-size: 11px; color: var(--gris); margin-top: 3px; font-style: italic; }
+
+/* CATÁLOGO */
+.upload-zone {
+  border: 2px dashed var(--azul-light); border-radius: 12px; padding: 24px 16px;
+  text-align: center; cursor: pointer; transition: all 0.2s;
+  background: #f0f6ff;
+}
+.upload-zone:hover { background: #dbeafe; border-color: var(--azul); }
+.upload-zone input { display: none; }
+.upload-icon { font-size: 36px; margin-bottom: 8px; }
+.upload-text { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 16px; color: var(--azul); }
+.upload-sub { font-size: 12px; color: var(--gris); margin-top: 4px; }
+.catalog-stats {
+  display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap;
+}
+.stat-chip {
+  background: var(--azul); color: white; padding: 4px 12px; border-radius: 20px;
+  font-size: 12px; font-weight: 600;
+}
+
+/* BÚSQUEDA PRODUCTOS */
+.search-box-wrap { position: relative; margin-bottom: 12px; }
+.search-box-wrap input {
+  width: 100%; padding: 12px 40px 12px 14px; border: 2px solid var(--gris-light);
+  border-radius: 10px; font-size: 14px; font-family: 'Barlow', sans-serif;
+}
+.search-box-wrap input:focus { outline: none; border-color: var(--azul-light); }
+.search-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--gris); font-size: 18px; }
+.autocomplete-list {
+  position: absolute; top: 100%; left: 0; right: 0; background: white;
+  border: 2px solid var(--azul-light); border-top: none; border-radius: 0 0 10px 10px;
+  max-height: 220px; overflow-y: auto; z-index: 50; box-shadow: var(--shadow-lg);
+}
+.autocomplete-item {
+  padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--gris-light);
+  transition: background 0.15s;
+}
+.autocomplete-item:hover { background: #f0f6ff; }
+.autocomplete-item .prod-code { font-size: 11px; color: var(--gris); font-weight: 600; }
+.autocomplete-item .prod-name { font-size: 14px; font-weight: 600; color: var(--azul); }
+.autocomplete-item .prod-um { font-size: 11px; color: var(--naranja); font-weight: 600; }
+
+/* AGREGAR PRODUCTO MANUAL */
+.add-product-form {
+  background: #f8faff; border: 2px solid var(--gris-light); border-radius: 10px;
+  padding: 14px; margin-bottom: 14px;
+}
+.add-product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.add-product-grid .span2 { grid-column: 1 / -1; }
+.add-product-form input {
+  width: 100%; padding: 9px 11px; border: 2px solid var(--gris-light);
+  border-radius: 8px; font-size: 13px; font-family: 'Barlow', sans-serif;
+}
+.add-product-form input:focus { outline: none; border-color: var(--azul-light); }
+
+/* TABLA PEDIDO */
+.pedido-header {
+  display: grid; grid-template-columns: 70px 1fr 60px 70px 80px;
+  gap: 6px; padding: 8px 10px; background: var(--azul);
+  color: white; border-radius: 8px 8px 0 0;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.pedido-row {
+  display: grid; grid-template-columns: 70px 1fr 60px 70px 80px;
+  gap: 6px; padding: 8px 10px; border-bottom: 1px solid var(--gris-light);
+  background: white; align-items: center; transition: background 0.15s;
+}
+.pedido-row:hover { background: #f8faff; }
+.pedido-row:last-child { border-radius: 0 0 8px 8px; border-bottom: none; }
+.prod-row-code { font-size: 11px; font-weight: 700; color: var(--gris); }
+.prod-row-name { font-size: 13px; font-weight: 600; color: var(--azul); line-height: 1.2; }
+.prod-row-um { font-size: 11px; color: var(--naranja); font-weight: 700; text-align: center; }
+.qty-input {
+  width: 100%; text-align: center; padding: 6px 4px; border: 2px solid var(--gris-light);
+  border-radius: 6px; font-size: 14px; font-weight: 700; color: var(--azul);
+  font-family: 'Barlow', sans-serif;
+}
+.qty-input:focus { outline: none; border-color: var(--naranja); }
+.row-actions { display: flex; gap: 4px; justify-content: center; }
+.btn-del {
+  background: #fee2e2; color: var(--rojo); border: none; border-radius: 6px;
+  width: 28px; height: 28px; cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+}
+.btn-del:hover { background: var(--rojo); color: white; }
+.btn-edit-row {
+  background: #dbeafe; color: var(--azul-light); border: none; border-radius: 6px;
+  width: 28px; height: 28px; cursor: pointer; font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+}
+.btn-edit-row:hover { background: var(--azul-light); color: white; }
+
+.pedido-empty {
+  text-align: center; padding: 40px 20px; color: var(--gris);
+  background: white; border-radius: 8px; border: 2px dashed var(--gris-light);
+}
+.pedido-empty .empty-icon { font-size: 40px; margin-bottom: 8px; }
+
+/* RESUMEN */
+.resumen-bar {
+  background: var(--azul); color: white; border-radius: 10px; padding: 12px 16px;
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;
+}
+.resumen-count { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; }
+.resumen-label { font-size: 11px; opacity: 0.7; }
+
+/* BOTONES ACCIÓN */
+.actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+.btn-action {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 13px 10px; border-radius: 10px; border: none; cursor: pointer;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.2s;
+}
+.btn-action:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+.btn-action:active { transform: translateY(0); }
+.btn-excel { background: #166534; color: white; }
+.btn-print { background: var(--azul); color: white; }
+.btn-backup { background: var(--gris); color: white; }
+.btn-restore { background: #92400e; color: white; }
+.btn-whatsapp { background: #16a34a; color: white; grid-column: 1 / -1; padding: 16px; font-size: 17px; }
+.btn-clear { background: #fee2e2; color: var(--rojo); }
+
+/* MODAL */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200;
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+  backdrop-filter: blur(4px);
+}
+.modal {
+  background: white; border-radius: 16px; width: 100%; max-width: 380px;
+  box-shadow: var(--shadow-lg); overflow: hidden;
+}
+.modal-header {
+  background: var(--azul); padding: 16px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-header h3 { color: white; font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; }
+.modal-close { background: rgba(255,255,255,0.2); border: none; color: white; width: 30px; height: 30px; border-radius: 6px; cursor: pointer; font-size: 16px; }
+.modal-body { padding: 20px; }
+.modal-body .form-group { margin-bottom: 12px; }
+.modal-footer { padding: 14px 20px; border-top: 1px solid var(--gris-light); display: flex; gap: 10px; }
+.btn-primary {
+  flex: 1; background: var(--naranja); color: white; border: none; border-radius: 8px;
+  padding: 11px; font-family: 'Barlow Condensed', sans-serif; font-size: 15px;
+  font-weight: 700; cursor: pointer; text-transform: uppercase;
+}
+.btn-secondary {
+  background: var(--gris-light); color: var(--azul); border: none; border-radius: 8px;
+  padding: 11px 16px; font-family: 'Barlow Condensed', sans-serif; font-size: 15px;
+  font-weight: 700; cursor: pointer;
+}
+
+/* BADGE CONTADOR */
+.tab-badge {
+  background: var(--naranja); color: white; border-radius: 10px;
+  padding: 1px 6px; font-size: 10px; font-weight: 700; margin-left: 4px;
+}
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  background: var(--azul); color: white; padding: 12px 20px; border-radius: 10px;
+  font-size: 14px; font-weight: 600; box-shadow: var(--shadow-lg);
+  z-index: 300; transition: opacity 0.3s; opacity: 0; pointer-events: none;
+  white-space: nowrap; max-width: 90vw; text-align: center;
+}
+.toast.show { opacity: 1; }
+.toast.success { background: var(--verde); }
+.toast.error { background: var(--rojo); }
+
+/* FOOTER */
+.footer {
+  background: var(--azul); color: rgba(255,255,255,0.5);
+  text-align: center; padding: 12px 16px; font-size: 11px; margin-top: 30px;
+}
+
+/* UTIL */
+.hidden { display: none !important; }
+.mt8 { margin-top: 8px; }
+.mt16 { margin-top: 16px; }
+
+/* RESPONSIVE */
+@media (max-width: 400px) {
+  .pedido-header, .pedido-row { grid-template-columns: 60px 1fr 48px 62px 70px; font-size: 12px; }
+  .actions-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <div class="header-logo">
+      <div class="logo-icon">D</div>
+      <div>
+        <div class="header-title">Distrileco</div>
+        <div class="header-sub">Portal de Pedidos</div>
+      </div>
+    </div>
+    <button class="whatsapp-config-btn" onclick="openWaConfig()">
+      📱 WhatsApp
+    </button>
+  </div>
+  <div class="header-tabs">
+    <button class="tab-btn active" onclick="showTab('tab-cliente')" id="btn-tab-cliente">👤 Cliente</button>
+    <button class="tab-btn" onclick="showTab('tab-catalogo')" id="btn-tab-catalogo">📦 Catálogo</button>
+    <button class="tab-btn" onclick="showTab('tab-pedido')" id="btn-tab-pedido">🛒 Pedido <span class="tab-badge" id="badge-count" style="display:none">0</span></button>
+    <button class="tab-btn" onclick="showTab('tab-acciones')" id="btn-tab-acciones">⚡ Acciones</button>
+  </div>
+</div>
+
+<!-- TAB CLIENTE -->
+<div class="section active" id="tab-cliente">
+  <div class="card">
+    <div class="card-title"><span class="icon">👤</span> Datos del Cliente</div>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Nombre / Empresa *</label>
+        <input type="text" id="cli-nombre" placeholder="Ej: Supermercado La 14" />
+      </div>
+      <div class="form-group full">
+        <label>Dirección</label>
+        <input type="text" id="cli-direccion" placeholder="Calle, barrio, ciudad" />
+      </div>
+      <div class="form-group">
+        <label>Celular *</label>
+        <input type="tel" id="cli-celular" placeholder="300 000 0000" />
+      </div>
+      <div class="form-group">
+        <label>NIT / Cédula</label>
+        <input type="text" id="cli-nit" placeholder="Opcional" />
+      </div>
+      <div class="form-group full">
+        <label>Observaciones</label>
+        <textarea id="cli-obs" placeholder="Notas del pedido, horarios de entrega, etc."></textarea>
+      </div>
+      <div class="form-group full">
+        <label>Ubicación GPS</label>
+        <div class="gps-row">
+          <input type="text" id="cli-gps" placeholder="Lat, Lng — pulsa el botón 📍" readonly />
+          <button class="btn-gps" onclick="getGPS()" title="Obtener ubicación">📍</button>
+        </div>
+        <div class="gps-status" id="gps-status">Sin ubicación capturada</div>
+      </div>
+    </div>
+  </div>
+  <button class="btn-action btn-primary" style="width:100%;justify-content:center;font-size:16px;" onclick="showTab('tab-catalogo')">
+    Ir al Catálogo →
+  </button>
+</div>
+
+<!-- TAB CATÁLOGO -->
+<div class="section" id="tab-catalogo">
+  <div class="card">
+    <div class="card-title"><span class="icon">📤</span> Cargar Catálogo de Productos</div>
+    <label class="upload-zone" id="upload-zone">
+      <input type="file" id="file-catalog" accept=".csv,.xlsx,.xls" onchange="loadCatalog(event)" />
+      <div class="upload-icon">📊</div>
+      <div class="upload-text">Subir archivo de productos</div>
+      <div class="upload-sub">Formatos: CSV o Excel (.xlsx / .xls)<br>Columnas: <strong>codigo | nombre | unidad</strong></div>
+    </label>
+    <div class="catalog-stats" id="catalog-stats" style="display:none">
+      <span class="stat-chip" id="stat-total">0 productos</span>
+      <span class="stat-chip" style="background:var(--verde)" id="stat-file">📄 archivo cargado</span>
+    </div>
+    <div class="mt8" style="font-size:12px;color:var(--gris);background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px;">
+      💡 <strong>Formato recomendado:</strong><br>
+      Fila 1: encabezados <code>codigo</code>, <code>nombre</code>, <code>unidad</code><br>
+      Fila 2 en adelante: datos de cada producto<br>
+      También puedes agregar productos manualmente abajo.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">🔍</span> Buscar y Agregar al Pedido</div>
+    <div class="search-box-wrap">
+      <input type="text" id="search-prod" placeholder="Buscar por código o nombre…" oninput="searchProducts(this.value)" autocomplete="off" />
+      <span class="search-icon">🔍</span>
+      <div class="autocomplete-list" id="autocomplete-list" style="display:none"></div>
+    </div>
+    <div style="font-size:12px;color:var(--gris);text-align:center;margin-bottom:10px;">— o agrega manualmente —</div>
+    <div class="add-product-form">
+      <div class="add-product-grid">
+        <div class="form-group">
+          <label>Código</label>
+          <input type="text" id="man-codigo" placeholder="Ej: 001234" />
+        </div>
+        <div class="form-group">
+          <label>Unidad</label>
+          <input type="text" id="man-unidad" placeholder="Ej: UND, CJA" />
+        </div>
+        <div class="form-group span2">
+          <label>Nombre del Producto *</label>
+          <input type="text" id="man-nombre" placeholder="Nombre del producto" />
+        </div>
+        <div class="form-group">
+          <label>Cantidad</label>
+          <input type="number" id="man-cant" placeholder="1" min="1" />
+        </div>
+        <div class="form-group" style="display:flex;align-items:flex-end;">
+          <button class="btn-action btn-primary" style="width:100%;padding:9px;" onclick="addManual()">
+            ➕ Agregar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB PEDIDO -->
+<div class="section" id="tab-pedido">
+  <div class="resumen-bar">
+    <div>
+      <div class="resumen-count" id="res-nombre">Sin cliente</div>
+      <div class="resumen-label">Cliente activo</div>
+    </div>
+    <div style="text-align:right">
+      <div class="resumen-count" id="res-items">0 ítems</div>
+      <div class="resumen-label">en el pedido</div>
+    </div>
+  </div>
+
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div class="pedido-header">
+      <div>Código</div><div>Producto</div><div>U/M</div><div>Cant.</div><div>Acciones</div>
+    </div>
+    <div id="pedido-list"></div>
+    <div id="pedido-empty" class="pedido-empty">
+      <div class="empty-icon">🛒</div>
+      <div>El pedido está vacío</div>
+      <div style="font-size:12px;margin-top:4px;">Agrega productos desde el Catálogo</div>
+    </div>
+  </div>
+
+  <div style="text-align:right;margin-top:8px;">
+    <button class="btn-action btn-clear" style="display:inline-flex;padding:8px 14px;font-size:13px;" onclick="clearPedido()">🗑️ Limpiar pedido</button>
+  </div>
+</div>
+
+<!-- TAB ACCIONES -->
+<div class="section" id="tab-acciones">
+  <div class="card">
+    <div class="card-title"><span class="icon">⚡</span> Exportar y Enviar</div>
+    <div class="actions-grid">
+      <button class="btn-action btn-excel" onclick="exportExcel()">📊 Exportar Excel</button>
+      <button class="btn-action btn-print" onclick="printPedido()">🖨️ Imprimir</button>
+      <button class="btn-action btn-backup" onclick="backupData()">💾 Backup</button>
+      <button class="btn-action btn-restore" onclick="document.getElementById('restore-input').click()">📂 Restaurar</button>
+      <input type="file" id="restore-input" accept=".json" style="display:none" onchange="restoreData(event)" />
+      <button class="btn-action btn-whatsapp" onclick="sendWhatsApp()">📱 Enviar por WhatsApp</button>
+      <button class="btn-action btn-clear" onclick="clearAll()">🔄 Nuevo Pedido</button>
+    </div>
+  </div>
+
+  <div class="card" style="background:#fffbeb;border:2px solid #fde68a;">
+    <div class="card-title" style="border-color:#fde68a;"><span class="icon">📊</span> Resumen del Pedido</div>
+    <div id="resumen-preview" style="font-size:14px;color:var(--azul);line-height:1.8;"></div>
+  </div>
+</div>
+
+<!-- MODAL WHATSAPP CONFIG -->
+<div class="modal-overlay hidden" id="modal-wa">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>📱 Configurar WhatsApp</h3>
+      <button class="modal-close" onclick="closeModal('modal-wa')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Número destino (con código de país)</label>
+        <input type="tel" id="wa-number" placeholder="573001234567" />
+      </div>
+      <div style="font-size:12px;color:var(--gris);background:#f0f6ff;border-radius:8px;padding:10px;margin-top:8px;">
+        📌 Formato: <strong>57</strong> + número sin espacios ni guiones<br>
+        Ej: <code>573151234567</code>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-wa')">Cancelar</button>
+      <button class="btn-primary" onclick="saveWaNumber()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR FILA -->
+<div class="modal-overlay hidden" id="modal-edit">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>✏️ Editar Producto</h3>
+      <button class="modal-close" onclick="closeModal('modal-edit')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-idx" />
+      <div class="form-group" style="margin-bottom:12px;">
+        <label>Código</label>
+        <input type="text" id="edit-codigo" />
+      </div>
+      <div class="form-group" style="margin-bottom:12px;">
+        <label>Nombre del Producto</label>
+        <input type="text" id="edit-nombre" />
+      </div>
+      <div class="form-grid" style="margin-bottom:12px;">
+        <div class="form-group">
+          <label>Unidad</label>
+          <input type="text" id="edit-unidad" />
+        </div>
+        <div class="form-group">
+          <label>Cantidad</label>
+          <input type="number" id="edit-cant" min="1" />
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-edit')">Cancelar</button>
+      <button class="btn-primary" onclick="saveEdit()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<div class="footer">Desarrollada por Vibras Positivas HM — Derechos de Autor Reservados</div>
+
+<script>
+// ===== STATE =====
+let catalog = [];
+let pedido = [];
+let waNumber = localStorage.getItem('distrileco_wa') || '';
+
+// ===== TABS =====
+function showTab(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('btn-' + id).classList.add('active');
+  if (id === 'tab-pedido') renderPedido();
+  if (id === 'tab-acciones') renderResumen();
+}
+
+// ===== TOAST =====
+function toast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.className = 'toast', 2800);
+}
+
+// ===== MODAL =====
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+// ===== WHATSAPP CONFIG =====
+function openWaConfig() {
+  document.getElementById('wa-number').value = waNumber;
+  openModal('modal-wa');
+}
+function saveWaNumber() {
+  waNumber = document.getElementById('wa-number').value.replace(/\D/g,'');
+  localStorage.setItem('distrileco_wa', waNumber);
+  closeModal('modal-wa');
+  toast('✅ Número guardado: ' + waNumber, 'success');
+}
+
+// ===== GPS =====
+function getGPS() {
+  document.getElementById('gps-status').textContent = '⏳ Obteniendo ubicación...';
+  if (!navigator.geolocation) { toast('GPS no disponible en este dispositivo', 'error'); return; }
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const lat = pos.coords.latitude.toFixed(6);
+      const lng = pos.coords.longitude.toFixed(6);
+      document.getElementById('cli-gps').value = lat + ', ' + lng;
+      document.getElementById('gps-status').textContent = `📍 Precisión: ±${Math.round(pos.coords.accuracy)}m`;
+      toast('📍 Ubicación capturada', 'success');
+    },
+    err => {
+      document.getElementById('gps-status').textContent = '❌ No se pudo obtener la ubicación';
+      toast('Error GPS: ' + err.message, 'error');
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+}
+
+// ===== CATÁLOGO =====
+function loadCatalog(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const ext = file.name.split('.').pop().toLowerCase();
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      if (ext === 'csv') {
+        parseCsv(e.target.result);
+      } else {
+        const wb = XLSX.read(e.target.result, { type: 'binary' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const data = XLSX.utils.sheet_to_json(ws, { defval: '' });
+        parseExcelData(data);
+      }
+    } catch(err) { toast('❌ Error al leer el archivo: ' + err.message, 'error'); }
+  };
+  if (ext === 'csv') reader.readAsText(file, 'UTF-8');
+  else reader.readAsBinaryString(file);
+}
+
+function parseCsv(text) {
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) { toast('Archivo CSV vacío', 'error'); return; }
+  const sep = lines[0].includes(';') ? ';' : ',';
+  const headers = lines[0].split(sep).map(h => h.trim().toLowerCase().replace(/['"]/g,''));
+  const idxCodigo = headers.findIndex(h => h.includes('cod') || h === 'codigo' || h === 'referencia');
+  const idxNombre = headers.findIndex(h => h.includes('nom') || h.includes('prod') || h.includes('descr'));
+  const idxUnidad = headers.findIndex(h => h.includes('uni') || h === 'um' || h === 'u/m');
+  catalog = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split(sep).map(c => c.trim().replace(/['"]/g,''));
+    if (!cols[idxNombre >= 0 ? idxNombre : 1]) continue;
+    catalog.push({
+      codigo: idxCodigo >= 0 ? cols[idxCodigo] : '',
+      nombre: idxNombre >= 0 ? cols[idxNombre] : cols[1] || '',
+      unidad: idxUnidad >= 0 ? cols[idxUnidad] : 'UND'
+    });
+  }
+  saveCatalog();
+  updateCatalogStats(catalog.length);
+  toast(`✅ ${catalog.length} productos cargados`, 'success');
+}
+
+function parseExcelData(data) {
+  catalog = [];
+  const keys = Object.keys(data[0] || {}).map(k => k.toLowerCase());
+  const kCodigo = Object.keys(data[0]).find(k => k.toLowerCase().includes('cod') || k.toLowerCase().includes('ref')) || '';
+  const kNombre = Object.keys(data[0]).find(k => k.toLowerCase().includes('nom') || k.toLowerCase().includes('prod') || k.toLowerCase().includes('descr')) || Object.keys(data[0])[1] || '';
+  const kUnidad = Object.keys(data[0]).find(k => k.toLowerCase().includes('uni') || k.toLowerCase() === 'um') || '';
+  data.forEach(row => {
+    if (!row[kNombre]) return;
+    catalog.push({ codigo: row[kCodigo] || '', nombre: row[kNombre] || '', unidad: row[kUnidad] || 'UND' });
+  });
+  saveCatalog();
+  updateCatalogStats(catalog.length);
+  toast(`✅ ${catalog.length} productos cargados`, 'success');
+}
+
+function saveCatalog() { localStorage.setItem('distrileco_catalog', JSON.stringify(catalog)); }
+function loadCatalogFromStorage() {
+  const saved = localStorage.getItem('distrileco_catalog');
+  if (saved) { catalog = JSON.parse(saved); updateCatalogStats(catalog.length); }
+}
+function updateCatalogStats(n) {
+  if (n > 0) {
+    document.getElementById('catalog-stats').style.display = 'flex';
+    document.getElementById('stat-total').textContent = n + ' productos';
+  }
+}
+
+// ===== BÚSQUEDA =====
+function searchProducts(q) {
+  const list = document.getElementById('autocomplete-list');
+  if (!q || q.length < 2) { list.style.display = 'none'; return; }
+  const qLow = q.toLowerCase();
+  const results = catalog.filter(p =>
+    p.nombre.toLowerCase().includes(qLow) || p.codigo.toLowerCase().includes(qLow)
+  ).slice(0, 12);
+  if (!results.length) { list.style.display = 'none'; return; }
+  list.innerHTML = results.map((p, i) =>
+    `<div class="autocomplete-item" onclick="addFromCatalog(${catalog.indexOf(p)})">
+      <div class="prod-code">${p.codigo || '—'} <span class="prod-um">${p.unidad}</span></div>
+      <div class="prod-name">${p.nombre}</div>
+    </div>`
+  ).join('');
+  list.style.display = 'block';
+}
+
+function addFromCatalog(idx) {
+  const p = catalog[idx];
+  addProduct(p.codigo, p.nombre, p.unidad, 1);
+  document.getElementById('search-prod').value = '';
+  document.getElementById('autocomplete-list').style.display = 'none';
+  toast('✅ ' + p.nombre + ' agregado', 'success');
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.search-box-wrap')) document.getElementById('autocomplete-list').style.display = 'none';
+});
+
+// ===== AGREGAR MANUAL =====
+function addManual() {
+  const nombre = document.getElementById('man-nombre').value.trim();
+  if (!nombre) { toast('Ingresa el nombre del producto', 'error'); return; }
+  const codigo = document.getElementById('man-codigo').value.trim();
+  const unidad = document.getElementById('man-unidad').value.trim() || 'UND';
+  const cant = parseInt(document.getElementById('man-cant').value) || 1;
+  addProduct(codigo, nombre, unidad, cant);
+  document.getElementById('man-nombre').value = '';
+  document.getElementById('man-codigo').value = '';
+  document.getElementById('man-cant').value = '';
+  toast('✅ Producto agregado al pedido', 'success');
+}
+
+// ===== PEDIDO =====
+function addProduct(codigo, nombre, unidad, cant) {
+  const existing = pedido.findIndex(p => p.codigo === codigo && codigo !== '');
+  if (existing >= 0) {
+    pedido[existing].cantidad += cant;
+  } else {
+    pedido.push({ codigo, nombre, unidad, cantidad: cant });
+  }
+  savePedido();
+  updateBadge();
+}
+
+function savePedido() { localStorage.setItem('distrileco_pedido', JSON.stringify(pedido)); }
+function loadPedidoFromStorage() {
+  const saved = localStorage.getItem('distrileco_pedido');
+  if (saved) { pedido = JSON.parse(saved); updateBadge(); }
+}
+function updateBadge() {
+  const badge = document.getElementById('badge-count');
+  if (pedido.length > 0) { badge.style.display = 'inline'; badge.textContent = pedido.length; }
+  else badge.style.display = 'none';
+}
+
+function renderPedido() {
+  const list = document.getElementById('pedido-list');
+  const empty = document.getElementById('pedido-empty');
+  const nombre = document.getElementById('cli-nombre').value.trim() || 'Sin cliente';
+  document.getElementById('res-nombre').textContent = nombre;
+  document.getElementById('res-items').textContent = pedido.length + ' ítem' + (pedido.length !== 1 ? 's' : '');
+  if (!pedido.length) { list.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  list.innerHTML = pedido.map((p, i) =>
+    `<div class="pedido-row">
+      <div class="prod-row-code">${p.codigo || '—'}</div>
+      <div class="prod-row-name">${p.nombre}</div>
+      <div class="prod-row-um">${p.unidad}</div>
+      <div><input class="qty-input" type="number" min="1" value="${p.cantidad}" onchange="updateQty(${i},this.value)" /></div>
+      <div class="row-actions">
+        <button class="btn-edit-row" onclick="openEdit(${i})" title="Editar">✏️</button>
+        <button class="btn-del" onclick="delItem(${i})" title="Eliminar">🗑️</button>
+      </div>
+    </div>`
+  ).join('');
+}
+
+function updateQty(idx, val) {
+  const n = parseInt(val);
+  if (n > 0) { pedido[idx].cantidad = n; savePedido(); }
+}
+
+function delItem(idx) {
+  pedido.splice(idx, 1);
+  savePedido(); updateBadge(); renderPedido();
+}
+
+function clearPedido() {
+  if (!confirm('¿Limpiar todo el pedido?')) return;
+  pedido = []; savePedido(); updateBadge(); renderPedido();
+}
+
+// ===== EDITAR =====
+function openEdit(idx) {
+  const p = pedido[idx];
+  document.getElementById('edit-idx').value = idx;
+  document.getElementById('edit-codigo').value = p.codigo;
+  document.getElementById('edit-nombre').value = p.nombre;
+  document.getElementById('edit-unidad').value = p.unidad;
+  document.getElementById('edit-cant').value = p.cantidad;
+  openModal('modal-edit');
+}
+function saveEdit() {
+  const idx = parseInt(document.getElementById('edit-idx').value);
+  pedido[idx].codigo = document.getElementById('edit-codigo').value.trim();
+  pedido[idx].nombre = document.getElementById('edit-nombre').value.trim();
+  pedido[idx].unidad = document.getElementById('edit-unidad').value.trim();
+  pedido[idx].cantidad = parseInt(document.getElementById('edit-cant').value) || 1;
+  savePedido(); renderPedido();
+  closeModal('modal-edit');
+  toast('✅ Producto actualizado', 'success');
+}
+
+// ===== RESUMEN =====
+function renderResumen() {
+  const nombre = document.getElementById('cli-nombre').value.trim() || '—';
+  const cel = document.getElementById('cli-celular').value.trim() || '—';
+  const dir = document.getElementById('cli-direccion').value.trim() || '—';
+  const obs = document.getElementById('cli-obs').value.trim();
+  let html = `<strong>Cliente:</strong> ${nombre}<br><strong>Celular:</strong> ${cel}<br><strong>Dirección:</strong> ${dir}`;
+  if (obs) html += `<br><strong>Obs:</strong> ${obs}`;
+  html += `<br><strong>Total ítems:</strong> ${pedido.length}`;
+  if (pedido.length) {
+    html += `<br><br><em style="color:var(--gris)">Productos: ${pedido.slice(0,5).map(p=>p.nombre).join(', ')}${pedido.length>5?'...':''}</em>`;
+  }
+  document.getElementById('resumen-preview').innerHTML = html;
+}
+
+// ===== EXCEL =====
+function exportExcel() {
+  if (!pedido.length) { toast('El pedido está vacío', 'error'); return; }
+  const nombre = document.getElementById('cli-nombre').value.trim() || 'SinNombre';
+  const fecha = new Date().toLocaleDateString('es-CO');
+  const data = [
+    ['PEDIDO DISTRILECO'],
+    ['Fecha:', fecha],
+    ['Cliente:', nombre],
+    ['Dirección:', document.getElementById('cli-direccion').value.trim()],
+    ['Celular:', document.getElementById('cli-celular').value.trim()],
+    ['Observaciones:', document.getElementById('cli-obs').value.trim()],
+    [],
+    ['CÓDIGO', 'PRODUCTO', 'UNIDAD', 'CANTIDAD'],
+    ...pedido.map(p => [p.codigo, p.nombre, p.unidad, p.cantidad]),
+    [],
+    ['Total ítems:', pedido.length],
+    [],
+    ['Desarrollada por Vibras Positivas HM']
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  ws['!cols'] = [{wch:14},{wch:45},{wch:10},{wch:12}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Pedido');
+  XLSX.writeFile(wb, `Pedido_${nombre}_${fecha.replace(/\//g,'-')}.xlsx`);
+  toast('✅ Excel generado', 'success');
+}
+
+// ===== PRINT =====
+function printPedido() {
+  if (!pedido.length) { toast('El pedido está vacío', 'error'); return; }
+  const nombre = document.getElementById('cli-nombre').value.trim() || '—';
+  const cel = document.getElementById('cli-celular').value.trim() || '—';
+  const dir = document.getElementById('cli-direccion').value.trim() || '—';
+  const obs = document.getElementById('cli-obs').value.trim();
+  const nit = document.getElementById('cli-nit').value.trim();
+  const gps = document.getElementById('cli-gps').value.trim();
+  const fecha = new Date().toLocaleString('es-CO', {timeZone:'America/Bogota'});
+  const filas = pedido.map(p =>
+    `<tr><td>${p.codigo||'—'}</td><td>${p.nombre}</td><td>${p.unidad}</td><td><strong>${p.cantidad}</strong></td></tr>`
+  ).join('');
+  const win = window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Pedido Distrileco</title>
+  <style>
+    body{font-family:Arial,sans-serif;font-size:13px;color:#111;margin:20px;}
+    h1{font-size:20px;margin:0 0 4px;} h2{font-size:14px;font-weight:normal;color:#555;margin:0 0 12px;}
+    .info{background:#f5f5f5;padding:10px 14px;border-radius:6px;margin-bottom:14px;line-height:1.7;}
+    table{width:100%;border-collapse:collapse;margin-top:10px;}
+    th{background:#0d2b52;color:white;padding:7px 10px;text-align:left;font-size:12px;}
+    td{padding:6px 10px;border-bottom:1px solid #e5e7eb;font-size:13px;}
+    tr:nth-child(even){background:#f9fafb;}
+    .footer{margin-top:20px;font-size:10px;color:#999;text-align:center;border-top:1px solid #e5e7eb;padding-top:8px;}
+    @media print{button{display:none}}
+  </style></head><body>
+  <h1>📦 Pedido Distrileco</h1>
+  <h2>Fecha: ${fecha}</h2>
+  <div class="info">
+    <strong>Cliente:</strong> ${nombre}&nbsp;&nbsp;|&nbsp;&nbsp;<strong>Cel:</strong> ${cel}<br>
+    <strong>Dirección:</strong> ${dir}${nit?'<br><strong>NIT/CC:</strong> '+nit:''}${obs?'<br><strong>Obs:</strong> '+obs:''}${gps?'<br><strong>GPS:</strong> '+gps:''}
+  </div>
+  <table><thead><tr><th>Código</th><th>Producto</th><th>U/M</th><th>Cantidad</th></tr></thead>
+  <tbody>${filas}</tbody></table>
+  <p style="margin-top:10px;font-size:13px;"><strong>Total ítems: ${pedido.length}</strong></p>
+  <div class="footer">Desarrollada por Vibras Positivas HM — Derechos de Autor Reservados</div>
+  <script>window.onload=()=>window.print()<\/script></body></html>`);
+  win.document.close();
+}
+
+// ===== WHATSAPP =====
+function sendWhatsApp() {
+  if (!pedido.length) { toast('El pedido está vacío', 'error'); return; }
+  if (!waNumber) { toast('Configura el número de WhatsApp primero', 'error'); openWaConfig(); return; }
+  const nombre = document.getElementById('cli-nombre').value.trim() || '—';
+  const cel = document.getElementById('cli-celular').value.trim() || '—';
+  const dir = document.getElementById('cli-direccion').value.trim() || '—';
+  const obs = document.getElementById('cli-obs').value.trim();
+  const fecha = new Date().toLocaleString('es-CO', {timeZone:'America/Bogota'});
+  let msg = `🏪 *PEDIDO DISTRILECO*\n`;
+  msg += `📅 ${fecha}\n\n`;
+  msg += `👤 *Cliente:* ${nombre}\n`;
+  msg += `📱 *Celular:* ${cel}\n`;
+  msg += `📍 *Dirección:* ${dir}\n`;
+  if (obs) msg += `📝 *Obs:* ${obs}\n`;
+  msg += `\n━━━━━━━━━━━━━━━━━━━\n`;
+  msg += `*PRODUCTOS*\n━━━━━━━━━━━━━━━━━━━\n`;
+  pedido.forEach((p, i) => {
+    msg += `${i+1}. ${p.codigo ? '['+p.codigo+'] ' : ''}${p.nombre}\n   ${p.unidad} × *${p.cantidad}*\n`;
+  });
+  msg += `━━━━━━━━━━━━━━━━━━━\n`;
+  msg += `📦 *Total ítems: ${pedido.length}*`;
+  const url = `https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+}
+
+// ===== BACKUP / RESTORE =====
+function backupData() {
+  const backup = {
+    version: '1.0',
+    fecha: new Date().toISOString(),
+    cliente: {
+      nombre: document.getElementById('cli-nombre').value,
+      direccion: document.getElementById('cli-direccion').value,
+      celular: document.getElementById('cli-celular').value,
+      nit: document.getElementById('cli-nit').value,
+      observaciones: document.getElementById('cli-obs').value,
+      gps: document.getElementById('cli-gps').value
+    },
+    pedido,
+    catalog
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `backup_distrileco_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  toast('💾 Backup descargado', 'success');
+}
+
+function restoreData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.cliente) {
+        document.getElementById('cli-nombre').value = data.cliente.nombre || '';
+        document.getElementById('cli-direccion').value = data.cliente.direccion || '';
+        document.getElementById('cli-celular').value = data.cliente.celular || '';
+        document.getElementById('cli-nit').value = data.cliente.nit || '';
+        document.getElementById('cli-obs').value = data.cliente.observaciones || '';
+        document.getElementById('cli-gps').value = data.cliente.gps || '';
+      }
+      if (data.pedido) { pedido = data.pedido; savePedido(); updateBadge(); }
+      if (data.catalog && data.catalog.length) { catalog = data.catalog; saveCatalog(); updateCatalogStats(catalog.length); }
+      toast('✅ Datos restaurados correctamente', 'success');
+    } catch(err) { toast('❌ Archivo de backup inválido', 'error'); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ===== NUEVO PEDIDO =====
+function clearAll() {
+  if (!confirm('¿Iniciar un nuevo pedido? Se borrarán los datos del cliente y el pedido actual.')) return;
+  pedido = []; savePedido(); updateBadge();
+  ['cli-nombre','cli-direccion','cli-celular','cli-nit','cli-obs','cli-gps'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('gps-status').textContent = 'Sin ubicación capturada';
+  showTab('tab-cliente');
+  toast('🔄 Nuevo pedido iniciado', 'success');
+}
+
+// ===== INIT =====
+loadCatalogFromStorage();
+loadPedidoFromStorage();
+</script>
+</body>
+</html>
