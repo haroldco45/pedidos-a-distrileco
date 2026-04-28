@@ -337,6 +337,7 @@ body { font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--az
   <div class="header-tabs">
     <button class="tab-btn active" onclick="showTab('tab-cliente')" id="btn-tab-cliente">👤 Cliente</button>
     <button class="tab-btn" onclick="showTab('tab-catalogo')" id="btn-tab-catalogo">📦 Catálogo</button>
+    <button class="tab-btn" onclick="showTab('tab-fotos')" id="btn-tab-fotos">📸 Fotos</button>
     <button class="tab-btn" onclick="showTab('tab-pedido')" id="btn-tab-pedido">🛒 Pedido <span class="tab-badge" id="badge-count" style="display:none">0</span></button>
     <button class="tab-btn" onclick="showTab('tab-acciones')" id="btn-tab-acciones">⚡ Acciones</button>
   </div>
@@ -436,6 +437,32 @@ body { font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--az
         </button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- TAB FOTOS -->
+<div class="section" id="tab-fotos">
+  <div class="card">
+    <div class="card-title"><span class="icon">📸</span> Catálogo con Fotos</div>
+    <div style="font-size:14px;color:var(--gris);margin-bottom:14px;">
+      Mira el catálogo completo con imágenes de los productos. Tócalo o ábrelo en una nueva pestaña para verlo en pantalla completa.
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <a href="cataglodistri.pdf" target="_blank" rel="noopener"
+         class="btn-action btn-primary"
+         style="width:100%;justify-content:center;font-size:16px;text-decoration:none;">
+        📖 Abrir Catálogo con Fotos
+      </a>
+      <a href="cataglodistri.pdf" download
+         class="btn-action"
+         style="width:100%;justify-content:center;font-size:14px;text-decoration:none;background:var(--gris-light);color:var(--azul);">
+        ⬇️ Descargar PDF
+      </a>
+    </div>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <iframe src="cataglodistri.pdf#view=FitH" title="Catálogo con fotos"
+            style="width:100%;height:75vh;border:0;display:block;background:#f0f4f8;"></iframe>
   </div>
 </div>
 
