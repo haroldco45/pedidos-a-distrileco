@@ -1,1 +1,27 @@
-
+{
+  "name": "Pedidos Distrileco",
+  "short_name": "Distrileco",
+  "description": "Portal de pedidos Distrileco - Vibras Positivas HM",
+  "start_url": "/pedidos-a-distrileco/",
+  "scope": "/pedidos-a-distrileco/",
+  "display": "standalone",
+  "background_color": "#0d2b52",
+  "theme_color": "#0d2b52",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/haroldco45/pedidos-a-distrileco/main/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://raw.githubusercontent.com/haroldco45/pedidos-a-distrileco/main/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "es-CO"
+}
